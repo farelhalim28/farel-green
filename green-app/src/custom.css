@@ -1,0 +1,264 @@
+/* ================================
+   custom.css
+   Letakkan file ini di: src/custom.css
+   ================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #0f0f0f;
+  color: #e2e8f0;
+}
+
+/* === BIODATA CONTAINER === */
+.biodata-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+/* === CARD (dipakai oleh semua child komponen) === */
+.card {
+  background-color: #1a1a1a;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+}
+
+/* === FOTO PROFIL === */
+.foto-profil-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  margin-bottom: 20px;
+  color: white;
+}
+
+.foto-profil-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid rgba(255, 255, 255, 0.8);
+  margin-bottom: 16px;
+}
+
+.foto-profil-placeholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  margin-bottom: 16px;
+  border: 4px solid rgba(255, 255, 255, 0.8);
+}
+
+.foto-profil-wrapper h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.foto-profil-wrapper p {
+  font-size: 1rem;
+  opacity: 0.85;
+}
+
+/* === NAMA LENGKAP === */
+.nama-section h2 {
+  font-size: 1.1rem;
+  color: #667eea;
+  margin-bottom: 14px;
+  border-bottom: 2px solid #e8ecf8;
+  padding-bottom: 8px;
+}
+
+.nama-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.nama-item label {
+  display: block;
+  font-size: 0.78rem;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.nama-item p {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+/* === PENDIDIKAN === */
+.pendidikan-section h2 {
+  font-size: 1.1rem;
+  color: #667eea;
+  margin-bottom: 14px;
+  border-bottom: 2px solid #e8ecf8;
+  padding-bottom: 8px;
+}
+
+.pendidikan-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f4f8;
+}
+
+.pendidikan-item:last-child {
+  border-bottom: none;
+}
+
+.pendidikan-icon {
+  font-size: 1.5rem;
+  min-width: 36px;
+  text-align: center;
+}
+
+.pendidikan-info p {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.pendidikan-info span {
+  font-size: 0.82rem;
+  color: #718096;
+}
+
+/* === KEAHLIAN === */
+.keahlian-section h2 {
+  font-size: 1.1rem;
+  color: #667eea;
+  margin-bottom: 14px;
+  border-bottom: 2px solid #e8ecf8;
+  padding-bottom: 8px;
+}
+
+.skill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.skill-badge {
+  background-color: #eef2ff;
+  color: #667eea;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid #c7d2fe;
+}
+
+/* === HOBI === */
+.hobi-section h2 {
+  font-size: 1.1rem;
+  color: #667eea;
+  margin-bottom: 14px;
+  border-bottom: 2px solid #e8ecf8;
+  padding-bottom: 8px;
+}
+
+.hobi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.hobi-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 10px;
+  background-color: #f8faff;
+  border-radius: 12px;
+  border: 1px solid #e8ecf8;
+}
+
+.hobi-item span:first-child {
+  font-size: 1.8rem;
+}
+
+.hobi-item span:last-child {
+  font-size: 0.8rem;
+  color: #4a5568;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* === KONTAK & SOSMED === */
+.kontak-section h2 {
+  font-size: 1.1rem;
+  color: #667eea;
+  margin-bottom: 14px;
+  border-bottom: 2px solid #e8ecf8;
+  padding-bottom: 8px;
+}
+
+.kontak-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kontak-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kontak-icon {
+  font-size: 1.2rem;
+  min-width: 30px;
+  text-align: center;
+}
+
+.kontak-info label {
+  display: block;
+  font-size: 0.75rem;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kontak-info p {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #2d3748;
+}
+
+.kontak-info a {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #667eea;
+  text-decoration: none;
+}
+
+.kontak-info a:hover {
+  text-decoration: underline;
+}
