@@ -33,7 +33,7 @@ const dataBiodata = {
   riwayatPendidikan: [
     {
       icon: '🏫',
-      nama: 'SD Negeri 01 Penyasawan',
+      nama: 'SD Negeri 018 ',
       jurusan: '-',
       tahun: '2010 - 2016',
     },
@@ -70,9 +70,9 @@ const dataBiodata = {
   // --- Hobi ---
   daftarHobi: [
     { emoji: '💻', nama: 'Coding' },
-    { emoji: '📚', nama: 'Membaca' },
+    { emoji: '📚', nama: 'Futsal' },
     { emoji: '🎮', nama: 'Gaming' },
-    { emoji: '🎵', nama: 'Musik' },
+    { emoji: '🎵', nama: 'Sepak Bola' },
     { emoji: '📷', nama: 'Fotografi' },
     { emoji: '✈️', nama: 'Traveling' },
   ],

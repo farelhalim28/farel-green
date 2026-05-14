@@ -1,0 +1,502 @@
+[
+  {
+    "id": 1,
+    "nama": "Pantai Kuta",
+    "deskripsi": "Pantai ikonik di Bali yang terkenal dengan sunset memukau, ombak untuk surfing, dan kehidupan malam yang semarak.",
+    "gambar": "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&q=80",
+    "provinsi": "Bali",
+    "kategori": "Pantai",
+    "harga_tiket": 0,
+    "rating": 4.5,
+    "lokasi": {
+      "kota": "Badung",
+      "koordinat": {
+        "lat": -8.7184,
+        "lng": 115.1686
+      },
+      "alamat": "Jl. Pantai Kuta, Kuta, Badung, Bali"
+    },
+    "fasilitas": ["Parkir", "Toilet", "Penyewaan Papan Surfing", "Restoran", "Hotel Sekitar"],
+    "jam_operasional": {
+      "buka": "00:00",
+      "tutup": "24:00",
+      "catatan": "Buka 24 jam"
+    },
+    "tags": ["Pantai", "Surfing", "Sunset", "Populer"]
+  },
+  {
+    "id": 2,
+    "nama": "Candi Borobudur",
+    "deskripsi": "Candi Buddha terbesar di dunia yang dibangun pada abad ke-9, merupakan warisan budaya UNESCO dan salah satu keajaiban dunia.",
+    "gambar": "https://images.unsplash.com/photo-1596402184320-417e7178b2cd?w=600&q=80",
+    "provinsi": "Jawa Tengah",
+    "kategori": "Budaya",
+    "harga_tiket": 50000,
+    "rating": 4.9,
+    "lokasi": {
+      "kota": "Magelang",
+      "koordinat": {
+        "lat": -7.6079,
+        "lng": 110.2038
+      },
+      "alamat": "Jl. Badrawati, Borobudur, Magelang, Jawa Tengah"
+    },
+    "fasilitas": ["Parkir", "Toilet", "Pemandu Wisata", "Museum", "Toko Souvenir", "Restoran"],
+    "jam_operasional": {
+      "buka": "06:00",
+      "tutup": "17:00",
+      "catatan": "Termasuk area taman"
+    },
+    "tags": ["UNESCO", "Candi", "Budaya", "Sejarah"]
+  },
+  {
+    "id": 3,
+    "nama": "Raja Ampat",
+    "deskripsi": "Surga bawah laut dengan keanekaragaman hayati laut tertinggi di dunia. Terdiri dari 1.500 pulau kecil dengan terumbu karang yang menakjubkan.",
+    "gambar": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&q=80",
+    "provinsi": "Papua Barat",
+    "kategori": "Bahari",
+    "harga_tiket": 500000,
+    "rating": 4.9,
+    "lokasi": {
+      "kota": "Raja Ampat",
+      "koordinat": {
+        "lat": -0.5897,
+        "lng": 130.1361
+      },
+      "alamat": "Kepulauan Raja Ampat, Papua Barat"
+    },
+    "fasilitas": ["Resort", "Diving Center", "Snorkeling", "Perahu", "Pemandu Lokal"],
+    "jam_operasional": {
+      "buka": "06:00",
+      "tutup": "18:00",
+      "catatan": "Tergantung cuaca dan musim"
+    },
+    "tags": ["Diving", "Snorkeling", "Bahari", "Eksotis"]
+  },
+  {
+    "id": 4,
+    "nama": "Danau Toba",
+    "deskripsi": "Danau vulkanik terbesar di dunia sekaligus danau terbesar di Asia Tenggara. Terbentuk dari letusan supervolcano sekitar 74.000 tahun lalu.",
+    "gambar": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
+    "provinsi": "Sumatera Utara",
+    "kategori": "Alam",
+    "harga_tiket": 20000,
+    "rating": 4.7,
+    "lokasi": {
+      "kota": "Samosir",
+      "koordinat": {
+        "lat": 2.6845,
+        "lng": 98.8756
+      },
+      "alamat": "Kawasan Danau Toba, Sumatera Utara"
+    },
+    "fasilitas": ["Hotel", "Restoran", "Perahu Feri", "Sepeda Sewaan", "Pemandu Wisata"],
+    "jam_operasional": {
+      "buka": "06:00",
+      "tutup": "18:00",
+      "catatan": "Wisata danau sepanjang hari"
+    },
+    "tags": ["Danau", "Alam", "Budaya Batak", "Vulkanik"]
+  },
+  {
+    "id": 5,
+    "nama": "Gunung Bromo",
+    "deskripsi": "Gunung berapi aktif yang menakjubkan di Jawa Timur. Terkenal dengan pemandangan matahari terbit spektakuler dan lautan pasir yang luas.",
+    "gambar": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
+    "provinsi": "Jawa Timur",
+    "kategori": "Alam",
+    "harga_tiket": 29000,
+    "rating": 4.8,
+    "lokasi": {
+      "kota": "Probolinggo",
+      "koordinat": {
+        "lat": -7.9425,
+        "lng": 112.9530
+      },
+      "alamat": "TNBTS, Probolinggo, Jawa Timur"
+    },
+    "fasilitas": ["Parkir Jeep", "Kuda Sewaan", "Warung Makan", "Penginapan Sekitar", "Pemandu"],
+    "jam_operasional": {
+      "buka": "00:00",
+      "tutup": "24:00",
+      "catatan": "Sunrise terbaik pukul 04.00-06.00"
+    },
+    "tags": ["Gunung", "Vulkanik", "Sunrise", "Petualangan"]
+  },
+  {
+    "id": 6,
+    "nama": "Komodo National Park",
+    "deskripsi": "Rumah asli Komodo, kadal terbesar di dunia. Taman Nasional UNESCO ini menawarkan snorkeling, diving, dan trekking yang luar biasa.",
+    "gambar": "https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?w=600&q=80",
+    "provinsi": "Nusa Tenggara Timur",
+    "kategori": "Alam",
+    "harga_tiket": 150000,
+    "rating": 4.8,
+    "lokasi": {
+      "kota": "Labuan Bajo",
+      "koordinat": {
+        "lat": -8.5502,
+        "lng": 119.4897
+      },
+      "alamat": "Taman Nasional Komodo, NTT"
+    },
+    "fasilitas": ["Pemandu Wajib", "Perahu", "Snorkeling", "Diving", "Trekking"],
+    "jam_operasional": {
+      "buka": "07:00",
+      "tutup": "17:00",
+      "catatan": "Wajib dengan pemandu resmi"
+    },
+    "tags": ["UNESCO", "Komodo", "Diving", "Trekking"]
+  },
+  {
+    "id": 7,
+    "nama": "Kawah Ijen",
+    "deskripsi": "Kawah vulkanik dengan fenomena blue fire unik yang hanya ada dua di dunia. Danau kawah berwarna toska dengan kandungan asam tertinggi di dunia.",
+    "gambar": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
+    "provinsi": "Jawa Timur",
+    "kategori": "Alam",
+    "harga_tiket": 100000,
+    "rating": 4.7,
+    "lokasi": {
+      "kota": "Banyuwangi",
+      "koordinat": {
+        "lat": -8.0581,
+        "lng": 114.2423
+      },
+      "alamat": "Gunung Ijen, Banyuwangi, Jawa Timur"
+    },
+    "fasilitas": ["Parkir", "Penyewaan Masker Gas", "Pemandu", "Warung"],
+    "jam_operasional": {
+      "buka": "01:00",
+      "tutup": "12:00",
+      "catatan": "Blue fire terlihat dini hari 01.00-05.00"
+    },
+    "tags": ["Vulkanik", "Blue Fire", "Petualangan", "Unik"]
+  },
+  {
+    "id": 8,
+    "nama": "Ubud",
+    "deskripsi": "Pusat seni, budaya, dan spiritual Bali. Dikelilingi sawah terasering, hutan, dan sungai yang menakjubkan. Surganya yoga dan wellness.",
+    "gambar": "https://images.unsplash.com/photo-1570789210967-2cac24afeb00?w=600&q=80",
+    "provinsi": "Bali",
+    "kategori": "Budaya",
+    "harga_tiket": 50000,
+    "rating": 4.8,
+    "lokasi": {
+      "kota": "Gianyar",
+      "koordinat": {
+        "lat": -8.5069,
+        "lng": 115.2625
+      },
+      "alamat": "Ubud, Gianyar, Bali"
+    },
+    "fasilitas": ["Museum", "Galeri Seni", "Spa", "Restoran", "Yoga Studio", "Pasar"],
+    "jam_operasional": {
+      "buka": "08:00",
+      "tutup": "22:00",
+      "catatan": "Beberapa atraksi buka sampai larut"
+    },
+    "tags": ["Seni", "Budaya", "Yoga", "Sawah"]
+  },
+  {
+    "id": 9,
+    "nama": "Labuan Bajo",
+    "deskripsi": "Kota pelabuhan cantik di ujung barat Flores yang menjadi gerbang menuju Taman Nasional Komodo dan spot diving terbaik Indonesia.",
+    "gambar": "https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=600&q=80",
+    "provinsi": "Nusa Tenggara Timur",
+    "kategori": "Bahari",
+    "harga_tiket": 0,
+    "rating": 4.7,
+    "lokasi": {
+      "kota": "Manggarai Barat",
+      "koordinat": {
+        "lat": -8.4557,
+        "lng": 119.8881
+      },
+      "alamat": "Labuan Bajo, Manggarai Barat, NTT"
+    },
+    "fasilitas": ["Hotel", "Resort", "Diving Center", "Kapal Wisata", "Restoran"],
+    "jam_operasional": {
+      "buka": "00:00",
+      "tutup": "24:00",
+      "catatan": "Kota wisata aktif sepanjang hari"
+    },
+    "tags": ["Bahari", "Pelabuhan", "Diving", "Gateway"]
+  },
+  {
+    "id": 10,
+    "nama": "Candi Prambanan",
+    "deskripsi": "Kompleks candi Hindu terbesar di Indonesia dan Asia Tenggara. Dibangun pada abad ke-9 dan merupakan warisan budaya dunia UNESCO.",
+    "gambar": "https://images.unsplash.com/photo-1605649461784-7a69520db880?w=600&q=80",
+    "provinsi": "Yogyakarta",
+    "kategori": "Budaya",
+    "harga_tiket": 50000,
+    "rating": 4.8,
+    "lokasi": {
+      "kota": "Sleman",
+      "koordinat": {
+        "lat": -7.7520,
+        "lng": 110.4914
+      },
+      "alamat": "Jl. Raya Solo-Yogyakarta, Sleman, DIY"
+    },
+    "fasilitas": ["Parkir", "Museum", "Pemandu", "Toko Souvenir", "Restoran", "Pertunjukan Ramayana"],
+    "jam_operasional": {
+      "buka": "06:00",
+      "tutup": "17:00",
+      "catatan": "Pertunjukan Ramayana malam hari"
+    },
+    "tags": ["UNESCO", "Candi", "Hindu", "Sejarah"]
+  },
+  {
+    "id": 11,
+    "nama": "Pantai Pink Lombok",
+    "deskripsi": "Pantai unik dengan pasir berwarna merah muda yang langka. Salah satu dari sedikit pantai berpasir pink di dunia dengan air jernih biru kehijauan.",
+    "gambar": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
+    "provinsi": "Nusa Tenggara Barat",
+    "kategori": "Pantai",
+    "harga_tiket": 10000,
+    "rating": 4.6,
+    "lokasi": {
+      "kota": "Lombok Timur",
+      "koordinat": {
+        "lat": -8.8925,
+        "lng": 116.5064
+      },
+      "alamat": "Tangsi, Jerowaru, Lombok Timur, NTB"
+    },
+    "fasilitas": ["Parkir", "Warung Makan", "Snorkeling", "Kapal Sewaan"],
+    "jam_operasional": {
+      "buka": "07:00",
+      "tutup": "17:00",
+      "catatan": "Akses terbaik saat air tenang"
+    },
+    "tags": ["Pantai", "Unik", "Pasir Pink", "Snorkeling"]
+  },
+  {
+    "id": 12,
+    "nama": "Taman Nasional Wakatobi",
+    "deskripsi": "Surga diving kelas dunia di Sulawesi Tenggara. Memiliki 750 spesies ikan dan 850 spesies terumbu karang dari 850 spesies yang ada di dunia.",
+    "gambar": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&q=80",
+    "provinsi": "Sulawesi Tenggara",
+    "kategori": "Bahari",
+    "harga_tiket": 150000,
+    "rating": 4.9,
+    "lokasi": {
+      "kota": "Wakatobi",
+      "koordinat": {
+        "lat": -5.4835,
+        "lng": 123.5797
+      },
+      "alamat": "Taman Nasional Wakatobi, Sulawesi Tenggara"
+    },
+    "fasilitas": ["Resort", "Diving Center", "Snorkeling", "Pemandu", "Kapal Selam"],
+    "jam_operasional": {
+      "buka": "06:00",
+      "tutup": "18:00",
+      "catatan": "Tergantung kondisi cuaca"
+    },
+    "tags": ["Diving", "Bahari", "Terumbu Karang", "UNESCO"]
+  },
+  {
+    "id": 13,
+    "nama": "Gunung Rinjani",
+    "deskripsi": "Gunung berapi aktif tertinggi kedua di Indonesia (3.726 mdpl) di Lombok. Menawarkan trek menantang dengan pemandangan danau Segara Anak yang memukau.",
+    "gambar": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=80",
+    "provinsi": "Nusa Tenggara Barat",
+    "kategori": "Alam",
+    "harga_tiket": 150000,
+    "rating": 4.8,
+    "lokasi": {
+      "kota": "Lombok Utara",
+      "koordinat": {
+        "lat": -8.4189,
+        "lng": 116.4660
+      },
+      "alamat": "Taman Nasional Gunung Rinjani, NTB"
+    },
+    "fasilitas": ["Camping Area", "Pemandu Wajib", "Porter", "Penyewaan Alat"],
+    "jam_operasional": {
+      "buka": "06:00",
+      "tutup": "18:00",
+      "catatan": "Pendakian 2-4 hari, ada musim tutup"
+    },
+    "tags": ["Gunung", "Trekking", "Pendakian", "Alam"]
+  },
+  {
+    "id": 14,
+    "nama": "Keraton Yogyakarta",
+    "deskripsi": "Istana Kesultanan Yogyakarta yang masih aktif hingga kini. Pusat budaya Jawa dengan arsitektur tradisional dan koleksi seni yang kaya.",
+    "gambar": "https://images.unsplash.com/photo-1596402184320-417e7178b2cd?w=600&q=80",
+    "provinsi": "Yogyakarta",
+    "kategori": "Budaya",
+    "harga_tiket": 15000,
+    "rating": 4.6,
+    "lokasi": {
+      "kota": "Yogyakarta",
+      "koordinat": {
+        "lat": -7.8052,
+        "lng": 110.3642
+      },
+      "alamat": "Jl. Rotowijayan Blok No.1, Keraton, Yogyakarta"
+    },
+    "fasilitas": ["Museum", "Pemandu", "Pertunjukan Wayang", "Gamelan", "Toko Batik"],
+    "jam_operasional": {
+      "buka": "08:30",
+      "tutup": "14:00",
+      "catatan": "Tutup Jumat. Dress code sopan"
+    },
+    "tags": ["Keraton", "Budaya Jawa", "Sejarah", "Seni"]
+  },
+  {
+    "id": 15,
+    "nama": "Pantai Lombok",
+    "deskripsi": "Deretan pantai eksotis di Lombok dengan pasir putih bersih dan air biru jernih. Surga bagi pencinta pantai yang menginginkan ketenangan.",
+    "gambar": "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&q=80",
+    "provinsi": "Nusa Tenggara Barat",
+    "kategori": "Pantai",
+    "harga_tiket": 10000,
+    "rating": 4.7,
+    "lokasi": {
+      "kota": "Lombok Tengah",
+      "koordinat": {
+        "lat": -8.8955,
+        "lng": 116.0585
+      },
+      "alamat": "Pantai Kuta Lombok, Lombok Tengah, NTB"
+    },
+    "fasilitas": ["Parkir", "Warung", "Surfing", "Hotel", "Penyewaan Kuda"],
+    "jam_operasional": {
+      "buka": "06:00",
+      "tutup": "18:00",
+      "catatan": "Buka sepanjang hari"
+    },
+    "tags": ["Pantai", "Surfing", "Pasir Putih", "Tenang"]
+  },
+  {
+    "id": 16,
+    "nama": "Taman Mini Indonesia Indah",
+    "deskripsi": "Taman budaya yang merepresentasikan seluruh budaya Indonesia. Menampilkan replika rumah adat dari 34 provinsi, museum, dan atraksi budaya.",
+    "gambar": "https://images.unsplash.com/photo-1570789210967-2cac24afeb00?w=600&q=80",
+    "provinsi": "DKI Jakarta",
+    "kategori": "Budaya",
+    "harga_tiket": 25000,
+    "rating": 4.4,
+    "lokasi": {
+      "kota": "Jakarta Timur",
+      "koordinat": {
+        "lat": -6.3024,
+        "lng": 106.8952
+      },
+      "alamat": "Jl. Raya Taman Mini, Jakarta Timur"
+    },
+    "fasilitas": ["Museum", "Kereta Gantung", "Teater", "Taman Bermain", "Restoran", "Hotel"],
+    "jam_operasional": {
+      "buka": "07:00",
+      "tutup": "20:00",
+      "catatan": "Buka setiap hari"
+    },
+    "tags": ["Budaya", "Edukasi", "Keluarga", "Museum"]
+  },
+  {
+    "id": 17,
+    "nama": "Sawah Terasering Jatiluwih",
+    "deskripsi": "Hamparan sawah terasering warisan budaya UNESCO Bali yang indah. Sistem irigasi tradisional subak yang telah berusia lebih dari 1000 tahun.",
+    "gambar": "https://images.unsplash.com/photo-1570789210967-2cac24afeb00?w=600&q=80",
+    "provinsi": "Bali",
+    "kategori": "Alam",
+    "harga_tiket": 40000,
+    "rating": 4.7,
+    "lokasi": {
+      "kota": "Tabanan",
+      "koordinat": {
+        "lat": -8.3690,
+        "lng": 115.1335
+      },
+      "alamat": "Jatiluwih, Penebel, Tabanan, Bali"
+    },
+    "fasilitas": ["Parkir", "Restoran", "Trekking", "Sepeda Sewaan", "Warung"],
+    "jam_operasional": {
+      "buka": "07:00",
+      "tutup": "18:00",
+      "catatan": "Terbaik saat musim tanam"
+    },
+    "tags": ["UNESCO", "Sawah", "Alam", "Bali"]
+  },
+  {
+    "id": 18,
+    "nama": "Bunaken",
+    "deskripsi": "Taman laut nasional di Sulawesi Utara dengan dinding karang vertikal spektakuler dan keanekaragaman biota laut yang mengagumkan.",
+    "gambar": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&q=80",
+    "provinsi": "Sulawesi Utara",
+    "kategori": "Bahari",
+    "harga_tiket": 150000,
+    "rating": 4.8,
+    "lokasi": {
+      "kota": "Manado",
+      "koordinat": {
+        "lat": 1.6207,
+        "lng": 124.7563
+      },
+      "alamat": "Taman Nasional Bunaken, Manado, Sulawesi Utara"
+    },
+    "fasilitas": ["Diving Center", "Snorkeling", "Resort", "Pemandu", "Penyewaan Alat"],
+    "jam_operasional": {
+      "buka": "06:00",
+      "tutup": "18:00",
+      "catatan": "Tergantung kondisi laut"
+    },
+    "tags": ["Diving", "Bahari", "Taman Laut", "Snorkeling"]
+  },
+  {
+    "id": 19,
+    "nama": "Toraja",
+    "deskripsi": "Daerah pegunungan di Sulawesi Selatan dengan budaya unik dan ritual pemakaman yang terkenal di dunia. Rumah adat Tongkonan menjadi ikon budaya.",
+    "gambar": "https://images.unsplash.com/photo-1596402184320-417e7178b2cd?w=600&q=80",
+    "provinsi": "Sulawesi Selatan",
+    "kategori": "Budaya",
+    "harga_tiket": 20000,
+    "rating": 4.7,
+    "lokasi": {
+      "kota": "Tana Toraja",
+      "koordinat": {
+        "lat": -3.0674,
+        "lng": 119.8676
+      },
+      "alamat": "Rantepao, Toraja Utara, Sulawesi Selatan"
+    },
+    "fasilitas": ["Hotel", "Pemandu", "Toko Souvenir", "Restoran", "Museum"],
+    "jam_operasional": {
+      "buka": "08:00",
+      "tutup": "17:00",
+      "catatan": "Festival adat sesuai kalender"
+    },
+    "tags": ["Budaya", "Adat", "Unik", "Pegunungan"]
+  },
+  {
+    "id": 20,
+    "nama": "Kepulauan Banda",
+    "deskripsi": "Kepulauan rempah bersejarah di Maluku. Dikelilingi laut biru dengan reruntuhan benteng Belanda, diving spektakuler, dan pala asli Banda.",
+    "gambar": "https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=600&q=80",
+    "provinsi": "Maluku",
+    "kategori": "Sejarah",
+    "harga_tiket": 25000,
+    "rating": 4.6,
+    "lokasi": {
+      "kota": "Banda Naira",
+      "koordinat": {
+        "lat": -4.5227,
+        "lng": 129.8973
+      },
+      "alamat": "Banda Naira, Maluku Tengah, Maluku"
+    },
+    "fasilitas": ["Hotel Heritage", "Diving", "Benteng", "Museum", "Perahu Tradisional"],
+    "jam_operasional": {
+      "buka": "08:00",
+      "tutup": "17:00",
+      "catatan": "Akses via kapal dari Ambon"
+    },
+    "tags": ["Sejarah", "Diving", "Rempah", "Heritage"]
+  }
+]

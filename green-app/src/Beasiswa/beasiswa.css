@@ -1,6 +1,173 @@
-/* ================================
+/* /* /* /* ================================
    custom.css
-   Letakkan file ini di: src/custom.css
+   Letakkan file ini di: src/custom.css/* ================================
+   FORM MAHASISWA STYLE
+   ================================ */
+
+.form-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+}
+
+/* CARD FORM */
+.form-card {
+  width: 100%;
+  max-width: 420px;
+
+  background: rgba(26, 26, 26, 0.85);
+  backdrop-filter: blur(12px);
+  padding: 30px;
+  border-radius: 20px;
+
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.6),
+    0 0 40px rgba(102, 126, 234, 0.2);
+
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* TITLE */
+.form-title {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.form-title h1 {
+  font-size: 1.6rem;
+  color: #fff;
+}
+
+.form-title p {
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
+/* STEP BULAT */
+.step-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 0.8rem;
+  font-weight: bold;
+
+  background-color: #2d2d2d;
+  color: #aaa;
+
+  transition: all 0.3s ease;
+}
+
+.step-circle.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  box-shadow: 0 0 10px rgba(102, 126, 234, 0.6);
+}
+
+/* INPUT */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 5px;
+  color: #cbd5e1;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+
+  border-radius: 10px;
+  border: 1px solid #333;
+
+  background-color: #121212;
+  color: #fff;
+
+  outline: none;
+  transition: 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 8px rgba(102, 126, 234, 0.5);
+}
+
+/* ERROR */
+.error-text {
+  font-size: 0.75rem;
+  color: #f87171;
+  margin-top: 3px;
+}
+
+/* BUTTON */
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+}
+
+.btn-secondary {
+  background-color: #2d2d2d;
+  color: white;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+/* RESULT */
+.result-card {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 12px;
+
+  background-color: #0f172a;
+  border: 1px solid #334155;
+}
+
+.result-card h3 {
+  color: #22c55e;
+  margin-bottom: 8px;
+}
    ================================ */
 
 * {
@@ -261,4 +428,4 @@ body {
 
 .kontak-info a:hover {
   text-decoration: underline;
-}
+}  

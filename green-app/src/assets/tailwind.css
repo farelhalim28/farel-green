@@ -1,0 +1,23 @@
+/* ================================================
+   LETAK FILE: src/assets/tailwind.css
+   ================================================ */
+
+@import "tailwindcss";
+
+@theme {
+    --color-primary:     #2563eb;
+    --color-primary-light: #eff6ff;
+    --color-primary-dark:  #1d4ed8;
+    --color-success:     #10b981;
+    --color-warning:     #f59e0b;
+    --color-danger:      #ef4444;
+    --color-purple:      #8b5cf6;
+    --color-sidebar-bg:  #ffffff;
+    --color-bg:          #f1f5f9;
+    --color-card:        #ffffff;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--color-bg);
+}
