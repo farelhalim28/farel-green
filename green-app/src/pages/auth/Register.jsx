@@ -2,6 +2,8 @@
 // LETAK FILE: src/pages/auth/Register.jsx
 // ================================================
 
+import { Link } from "react-router-dom"
+
 export default function Register() {
     return (
         <div>
@@ -53,6 +55,14 @@ export default function Register() {
                     Register
                 </button>
             </form>
+
+            {/* Link balik ke Login */}
+            <p className="text-center text-sm text-gray-500 mt-4">
+                Sudah punya akun?{" "}
+                <Link to="/login" className="text-green-500 font-semibold hover:underline">
+                    Masuk di sini
+                </Link>
+            </p>
         </div>
     )
 }

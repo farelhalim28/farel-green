@@ -40,7 +40,7 @@ export default function Sidebar() {
                         <FaTooth className="text-white text-lg" />
                     </div>
                     <div>
-                        <p className="font-bold text-gray-800 text-sm leading-tight">Dokter Gigi</p>
+                        <p className="font-bold text-gray-800 text-sm leading-tight">SIGIGI</p>
                         <p className="text-[11px] text-gray-400">Klinik Sehat Senyum</p>
                     </div>
                 </div>
@@ -71,7 +71,7 @@ export default function Sidebar() {
                 {/* Profile kecil di bawah */}
                 <div className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-gray-50 cursor-pointer">
                     <img
-                        src="https://avatar.iran.liara.run/public/girl/5"
+                        src="/img/Dokter.jpg"
                         className="w-9 h-9 rounded-full object-cover ring-2 ring-primary ring-offset-1"
                         alt="profile"
                     />

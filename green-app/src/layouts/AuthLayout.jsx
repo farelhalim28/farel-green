@@ -15,7 +15,7 @@ export default function AuthLayout() {
                     <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200 mb-3">
                         <FaTooth className="text-white text-2xl" />
                     </div>
-                    <h1 className="text-xl font-bold text-gray-800">Dokter Gigi</h1>
+                    <h1 className="text-xl font-bold text-gray-800">SIGIGI</h1>
                     <p className="text-xs text-gray-400">Klinik Sehat Senyum</p>
                 </div>
 

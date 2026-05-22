@@ -3,7 +3,7 @@
 // ================================================
 
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import axios from "axios"
 import { BsFillExclamationDiamondFill } from "react-icons/bs"
 import { ImSpinner2 } from "react-icons/im"
@@ -12,10 +12,7 @@ export default function Login() {
     const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
-    const [dataForm, setDataForm] = useState({
-        email: "",
-        password: "",
-    })
+    const [dataForm, setDataForm] = useState({ email: "", password: "" })
 
     const handleChange = (evt) => {
         const { name, value } = evt.target
@@ -101,6 +98,14 @@ export default function Login() {
                         placeholder="********"
                     />
                 </div>
+
+                {/* Link ke Forgot Password */}
+                <div className="text-right mb-4">
+                    <Link to="/forgot" className="text-sm text-green-500 hover:underline">
+                        Lupa Password?
+                    </Link>
+                </div>
+
                 <button
                     type="submit"
                     className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300"
@@ -111,6 +116,14 @@ export default function Login() {
 
             <p className="text-center text-xs text-gray-400 mt-4">
                 Demo: username <b>emilys</b> / password <b>emilyspass</b>
+            </p>
+
+            {/* Link ke Register */}
+            <p className="text-center text-sm text-gray-500 mt-3">
+                Belum punya akun?{" "}
+                <Link to="/register" className="text-green-500 font-semibold hover:underline">
+                    Daftar Sekarang
+                </Link>
             </p>
         </div>
     )
