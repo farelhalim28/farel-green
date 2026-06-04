@@ -6,20 +6,21 @@ import { NavLink } from "react-router-dom";
 import {
     MdDashboard, MdCalendarMonth, MdPeople,
     MdMedicalServices, MdAssignment, MdPayment,
-    MdInventory, MdBarChart, MdSettings
+    MdInventory, MdBarChart, MdSettings, MdGridView
 } from "react-icons/md";
 import { FaTooth } from "react-icons/fa";
 
 const menuItems = [
-    { icon: MdDashboard,        label: "Dashboard",        path: "/" },
-    { icon: MdCalendarMonth,    label: "Janji Temu",       path: "/janji-temu" },
-    { icon: MdPeople,           label: "Pasien",           path: "/pasien" },
-    { icon: MdMedicalServices,  label: "Perawatan",        path: "/perawatan" },
-    { icon: MdAssignment,       label: "Rekam Medis",      path: "/rekam-medis" },
-    { icon: MdPayment,          label: "Pembayaran",       path: "/pembayaran" },
-    { icon: MdInventory,        label: "Stok & Inventaris",path: "/stok" },
-    { icon: MdBarChart,         label: "Laporan",          path: "/laporan" },
-    { icon: MdSettings,         label: "Pengaturan",       path: "/pengaturan" },
+    { icon: MdDashboard,       label: "Dashboard",         path: "/" },
+    { icon: MdCalendarMonth,   label: "Janji Temu",        path: "/janji-temu" },
+    { icon: MdPeople,          label: "Pasien",            path: "/pasien" },
+    { icon: MdMedicalServices, label: "Perawatan",         path: "/perawatan" },
+    { icon: MdAssignment,      label: "Rekam Medis",       path: "/rekam-medis" },
+    { icon: MdPayment,         label: "Pembayaran",        path: "/pembayaran" },
+    { icon: MdInventory,       label: "Stok & Inventaris", path: "/stok" },
+    { icon: MdBarChart,        label: "Laporan",           path: "/laporan" },
+    { icon: MdSettings,        label: "Pengaturan",        path: "/pengaturan" },
+    { icon: MdGridView,        label: "Components",        path: "/components" }, // ← TAMBAHAN
 ];
 
 export default function Sidebar() {
