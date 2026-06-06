@@ -54,74 +54,124 @@
 // ================================================
 
 import React, { Suspense, lazy } from "react"
-import { Routes, Route } from "react-router-dom"
+import { Routes, Route, Navigate } from "react-router-dom"
 import Loading from "./components/Loading"
 
-// ── Import langsung layouts (jangan di-lazy)
+// ── Import Layout
 import MainLayout from "./layouts/MainLayout"
 import AuthLayout from "./layouts/AuthLayout"
 
-// ── Lazy: /components
-const Sidebar          = lazy(() => import("./components/Sidebar"))
-const Header           = lazy(() => import("./components/Header"))
-const SearchBar        = lazy(() => import("./components/SearchBar"))
-const NotificationBell = lazy(() => import("./components/NotificationBell"))
-const ProfileDropdown  = lazy(() => import("./components/ProfileDropdown"))
-const StatCard         = lazy(() => import("./components/StatCard"))
-const RevenueChart     = lazy(() => import("./components/RevenueChart"))
-const AppointmentList  = lazy(() => import("./components/AppointmentList"))
-const MiniCalendar     = lazy(() => import("./components/MiniCalendar"))
-const QuickActions     = lazy(() => import("./components/QuickActions"))
-
-// ── Lazy: komponen baru pertemuan 10
-const Button           = lazy(() => import("./components/Button"))
-const Badge            = lazy(() => import("./components/Badge"))
-const Avatar           = lazy(() => import("./components/Avatar"))
-const Card             = lazy(() => import("./components/Card"))
-const Table            = lazy(() => import("./components/Table"))
-const InputField       = lazy(() => import("./components/InputField"))
-const SelectField      = lazy(() => import("./components/SelectField"))
-const TextArea         = lazy(() => import("./components/TextArea"))
-const Alert            = lazy(() => import("./components/Alert"))
-const Modal            = lazy(() => import("./components/Modal"))
-const Container        = lazy(() => import("./components/Container"))
-const PageHeader       = lazy(() => import("./components/PageHeader"))
-const PatientCard      = lazy(() => import("./components/PatientCard"))
-const AppointmentCard  = lazy(() => import("./components/AppointmentCard"))
-const Footer           = lazy(() => import("./components/Footer"))
-
 // ── Lazy: /pages
-const Dashboard   = lazy(() => import("./pages/Dashboard"))
-const JanjiTemu   = lazy(() => import("./pages/JanjiTemu"))
-const Pasien      = lazy(() => import("./pages/Pasien"))
-const Components  = lazy(() => import("./pages/Components"))
+const Dashboard = lazy(() => import("./pages/Dashboard"))
+const JanjiTemu = lazy(() => import("./pages/JanjiTemu"))
+const Pasien = lazy(() => import("./pages/Pasien"))
+const Components = lazy(() => import("./pages/Components"))
 
-// ── Lazy: /pages/auth
-const Login    = lazy(() => import("./pages/auth/Login"))
+// ── HALAMAN CRM KLINIK GIGI
+const Perawatan = lazy(() => import("./pages/Perawatan"))
+const RekamMedis = lazy(() => import("./pages/RekamMedis"))
+const Pembayaran = lazy(() => import("./pages/Pembayaran"))
+const Laporan = lazy(() => import("./pages/Laporan"))
+const Pengaturan = lazy(() => import("./pages/Pengaturan"))
+
+// ── AUTH
+const Login = lazy(() => import("./pages/auth/Login"))
 const Register = lazy(() => import("./pages/auth/Register"))
-const Forgot   = lazy(() => import("./pages/auth/Forgot"))
+const Forgot = lazy(() => import("./pages/auth/Forgot"))
 
 export default function App() {
     return (
         <Suspense fallback={<Loading />}>
+
             <Routes>
 
-                {/* ── MainLayout: halaman utama ── */}
+                {/* =====================================
+                    REDIRECT AWAL KE LOGIN
+                ===================================== */}
+
+                <Route
+                    path="/"
+                    element={<Navigate to="/login" replace />}
+                />
+
+                {/* =====================================
+                    HALAMAN UTAMA
+                ===================================== */}
+
                 <Route element={<MainLayout />}>
-                    <Route path="/"            element={<Dashboard />} />
-                    <Route path="/janji-temu"  element={<JanjiTemu />} />
-                    <Route path="/pasien"      element={<Pasien />} />
-                    <Route path="/components"  element={<Components />} />
+
+                    <Route
+                        path="/dashboard"
+                        element={<Dashboard />}
+                    />
+
+                    <Route
+                        path="/janji-temu"
+                        element={<JanjiTemu />}
+                    />
+
+                    <Route
+                        path="/pasien"
+                        element={<Pasien />}
+                    />
+
+                    <Route
+                        path="/perawatan"
+                        element={<Perawatan />}
+                    />
+
+                    <Route
+                        path="/rekam-medis"
+                        element={<RekamMedis />}
+                    />
+
+                    <Route
+                        path="/pembayaran"
+                        element={<Pembayaran />}
+                    />
+
+                    <Route
+                        path="/laporan"
+                        element={<Laporan />}
+                    />
+
+                    <Route
+                        path="/pengaturan"
+                        element={<Pengaturan />}
+                    />
+
+                    <Route
+                        path="/components"
+                        element={<Components />}
+                    />
+
                 </Route>
 
-                {/* ── AuthLayout: halaman login, register, forgot ── */}
+                {/* =====================================
+                    AUTH
+                ===================================== */}
+
                 <Route element={<AuthLayout />}>
-                    <Route path="/login"    element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/forgot"   element={<Forgot />} />
+
+                    <Route
+                        path="/login"
+                        element={<Login />}
+                    />
+
+                    <Route
+                        path="/register"
+                        element={<Register />}
+                    />
+
+                    <Route
+                        path="/forgot"
+                        element={<Forgot />}
+                    />
+
                 </Route>
 
             </Routes>
+
         </Suspense>
     )
 }

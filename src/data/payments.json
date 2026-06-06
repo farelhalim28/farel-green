@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "invoice": "INV-2026-001",
+    "patient_id": 1,
+    "no_rm": "RM-2026-001",
+    "nama_pasien": "Siti Aisyah",
+    "jenis_perawatan": "Pembersihan Karang Gigi",
+    "tanggal": "2026-06-04",
+    "jatuh_tempo": "2026-06-04",
+    "nominal": 350000,
+    "metode": "BPJS",
+    "status": "Lunas",
+    "kasir": "Admin Klinik",
+    "bukti_pembayaran": true
+  },
+  {
+    "id": 2,
+    "invoice": "INV-2026-002",
+    "patient_id": 2,
+    "no_rm": "RM-2026-002",
+    "nama_pasien": "Budi Santoso",
+    "jenis_perawatan": "Tambal Gigi",
+    "tanggal": "2026-06-04",
+    "jatuh_tempo": "2026-06-04",
+    "nominal": 450000,
+    "metode": "Tunai",
+    "status": "Lunas",
+    "kasir": "Admin Klinik",
+    "bukti_pembayaran": true
+  },
+  {
+    "id": 3,
+    "invoice": "INV-2026-003",
+    "patient_id": 3,
+    "no_rm": "RM-2026-003",
+    "nama_pasien": "Dewi Lestari",
+    "jenis_perawatan": "Konsultasi & Pemeriksaan",
+    "tanggal": "2026-06-04",
+    "jatuh_tempo": "2026-06-04",
+    "nominal": 150000,
+    "metode": "Transfer",
+    "status": "Lunas",
+    "kasir": "Admin Klinik",
+    "bukti_pembayaran": true
+  },
+  {
+    "id": 4,
+    "invoice": "INV-2026-004",
+    "patient_id": 4,
+    "no_rm": "RM-2026-004",
+    "nama_pasien": "Rizky Pratama",
+    "jenis_perawatan": "Bleaching",
+    "tanggal": "2026-06-04",
+    "jatuh_tempo": "2026-06-07",
+    "nominal": 800000,
+    "metode": "Tunai",
+    "status": "Pending",
+    "kasir": "Admin Klinik",
+    "bukti_pembayaran": false
+  }
+]

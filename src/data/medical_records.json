@@ -1,0 +1,53 @@
+[
+  {
+    "id": 1,
+    "patient_id": 1,
+    "nama_pasien": "Siti Aisyah",
+    "no_rm": "RM-2026-001",
+    "tanggal": "2026-06-04",
+    "keluhan": "Gigi terasa kasar dan bau mulut",
+    "diagnosa": "Penumpukan karang gigi",
+    "tindakan": "Scaling",
+    "resep": "Mouthwash",
+    "tekanan_darah": "120/80",
+    "berat_badan": 55,
+    "tinggi_badan": 160,
+    "status_kontrol": "Kontrol 6 Bulan",
+    "catatan_dokter": "Kontrol kembali 6 bulan",
+    "dokter": "drg. Farel Abdul Halim"
+  },
+  {
+    "id": 2,
+    "patient_id": 2,
+    "nama_pasien": "Budi Santoso",
+    "no_rm": "RM-2026-002",
+    "tanggal": "2026-06-04",
+    "keluhan": "Gigi berlubang",
+    "diagnosa": "Karies Gigi",
+    "tindakan": "Tambal Gigi",
+    "resep": "Paracetamol",
+    "tekanan_darah": "125/85",
+    "berat_badan": 72,
+    "tinggi_badan": 170,
+    "status_kontrol": "Kontrol 1 Bulan",
+    "catatan_dokter": "Hindari makanan manis",
+    "dokter": "drg. Farel Abdul Halim"
+  },
+  {
+    "id": 3,
+    "patient_id": 3,
+    "nama_pasien": "Dewi Lestari",
+    "no_rm": "RM-2026-003",
+    "tanggal": "2026-06-04",
+    "keluhan": "Konsultasi behel",
+    "diagnosa": "Maloklusi Ringan",
+    "tindakan": "Konsultasi",
+    "resep": "-",
+    "tekanan_darah": "118/78",
+    "berat_badan": 50,
+    "tinggi_badan": 158,
+    "status_kontrol": "Rujukan Ortodonti",
+    "catatan_dokter": "Dirujuk ke ortodontis",
+    "dokter": "drg. Farel Abdul Halim"
+  }
+]

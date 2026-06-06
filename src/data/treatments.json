@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "kode_perawatan": "PRW-001",
+    "nama_perawatan": "Pembersihan Karang Gigi",
+    "kategori": "Perawatan Rutin",
+    "harga": 350000,
+    "durasi": "30 Menit",
+    "estimasi_kunjungan": 1,
+    "stok_dibutuhkan": "Scaler Tip",
+    "status": "Aktif",
+    "deskripsi": "Membersihkan karang gigi dan plak."
+  },
+  {
+    "id": 2,
+    "kode_perawatan": "PRW-002",
+    "nama_perawatan": "Tambal Gigi",
+    "kategori": "Perawatan Restoratif",
+    "harga": 450000,
+    "durasi": "45 Menit",
+    "estimasi_kunjungan": 1,
+    "stok_dibutuhkan": "Composite Resin",
+    "status": "Aktif",
+    "deskripsi": "Menutup kerusakan akibat karies."
+  },
+  {
+    "id": 3,
+    "kode_perawatan": "PRW-003",
+    "nama_perawatan": "Konsultasi & Pemeriksaan",
+    "kategori": "Pemeriksaan",
+    "harga": 150000,
+    "durasi": "30 Menit",
+    "estimasi_kunjungan": 1,
+    "stok_dibutuhkan": "-",
+    "status": "Aktif",
+    "deskripsi": "Pemeriksaan dan konsultasi kondisi gigi."
+  },
+  {
+    "id": 4,
+    "kode_perawatan": "PRW-004",
+    "nama_perawatan": "Bleaching",
+    "kategori": "Estetik",
+    "harga": 800000,
+    "durasi": "60 Menit",
+    "estimasi_kunjungan": 1,
+    "stok_dibutuhkan": "Bleaching Gel",
+    "status": "Aktif",
+    "deskripsi": "Memutihkan warna gigi."
+  }
+]
