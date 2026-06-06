@@ -53,31 +53,53 @@
 // LETAK FILE: src/App.jsx
 // ================================================
 
-import React, { Suspense, lazy } from "react"
-import { Routes, Route, Navigate } from "react-router-dom"
-import Loading from "./components/Loading"
+import React, { Suspense, lazy } from "react";
+import { Routes, Route } from "react-router-dom";
 
-// ── Import Layout
-import MainLayout from "./layouts/MainLayout"
-import AuthLayout from "./layouts/AuthLayout"
+import Loading from "./components/Loading";
 
-// ── Lazy: /pages
-const Dashboard = lazy(() => import("./pages/Dashboard"))
-const JanjiTemu = lazy(() => import("./pages/JanjiTemu"))
-const Pasien = lazy(() => import("./pages/Pasien"))
-const Components = lazy(() => import("./pages/Components"))
+// ================================================
+// LAYOUT
+// ================================================
 
-// ── HALAMAN CRM KLINIK GIGI
-const Perawatan = lazy(() => import("./pages/Perawatan"))
-const RekamMedis = lazy(() => import("./pages/RekamMedis"))
-const Pembayaran = lazy(() => import("./pages/Pembayaran"))
-const Laporan = lazy(() => import("./pages/Laporan"))
-const Pengaturan = lazy(() => import("./pages/Pengaturan"))
+import MainLayout from "./layouts/MainLayout";
+import AuthLayout from "./layouts/AuthLayout";
+import GuestLayout from "./layouts/GuestLayout";
 
-// ── AUTH
-const Login = lazy(() => import("./pages/auth/Login"))
-const Register = lazy(() => import("./pages/auth/Register"))
-const Forgot = lazy(() => import("./pages/auth/Forgot"))
+// ================================================
+// CRM
+// ================================================
+
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const JanjiTemu = lazy(() => import("./pages/JanjiTemu"));
+const Pasien = lazy(() => import("./pages/Pasien"));
+const Perawatan = lazy(() => import("./pages/Perawatan"));
+const RekamMedis = lazy(() => import("./pages/RekamMedis"));
+const Pembayaran = lazy(() => import("./pages/Pembayaran"));
+const Laporan = lazy(() => import("./pages/Laporan"));
+const Pengaturan = lazy(() => import("./pages/Pengaturan"));
+const Components = lazy(() => import("./pages/Components"));
+
+// ================================================
+// AUTH
+// ================================================
+
+const Login = lazy(() => import("./pages/auth/Login"));
+const Register = lazy(() => import("./pages/auth/Register"));
+const Forgot = lazy(() => import("./pages/auth/Forgot"));
+
+// ================================================
+// GUEST WEBSITE
+// ================================================
+
+const Home = lazy(() => import("./pages/guest/Home"));
+const ServicesPage = lazy(() => import("./pages/guest/ServicesPage"));
+const DoctorsPage = lazy(() => import("./pages/guest/DoctorsPage"));
+const MembershipPage = lazy(() => import("./pages/guest/MembershipPage"));
+const PromoPage = lazy(() => import("./pages/guest/PromoPage"));
+const FAQPage = lazy(() => import("./pages/guest/FAQPage"));
+const ContactPage = lazy(() => import("./pages/guest/ContactPage"));
+const AppointmentPage = lazy(() => import("./pages/guest/AppointmentPage"));
 
 export default function App() {
     return (
@@ -86,16 +108,78 @@ export default function App() {
             <Routes>
 
                 {/* =====================================
-                    REDIRECT AWAL KE LOGIN
+                    GUEST WEBSITE
                 ===================================== */}
 
-                <Route
-                    path="/"
-                    element={<Navigate to="/login" replace />}
-                />
+                <Route element={<GuestLayout />}>
+
+                    <Route
+                        path="/"
+                        element={<Home />}
+                    />
+
+                    <Route
+                        path="/services"
+                        element={<ServicesPage />}
+                    />
+
+                    <Route
+                        path="/doctors"
+                        element={<DoctorsPage />}
+                    />
+
+                    <Route
+                        path="/membership"
+                        element={<MembershipPage />}
+                    />
+
+                    <Route
+                        path="/promo"
+                        element={<PromoPage />}
+                    />
+
+                    <Route
+                        path="/faq"
+                        element={<FAQPage />}
+                    />
+
+                    <Route
+                        path="/contact"
+                        element={<ContactPage />}
+                    />
+
+                    <Route
+                        path="/appointment"
+                        element={<AppointmentPage />}
+                    />
+
+                </Route>
 
                 {/* =====================================
-                    HALAMAN UTAMA
+                    AUTH
+                ===================================== */}
+
+                <Route element={<AuthLayout />}>
+
+                    <Route
+                        path="/login"
+                        element={<Login />}
+                    />
+
+                    <Route
+                        path="/register"
+                        element={<Register />}
+                    />
+
+                    <Route
+                        path="/forgot"
+                        element={<Forgot />}
+                    />
+
+                </Route>
+
+                {/* =====================================
+                    CRM DASHBOARD
                 ===================================== */}
 
                 <Route element={<MainLayout />}>
@@ -147,31 +231,8 @@ export default function App() {
 
                 </Route>
 
-                {/* =====================================
-                    AUTH
-                ===================================== */}
-
-                <Route element={<AuthLayout />}>
-
-                    <Route
-                        path="/login"
-                        element={<Login />}
-                    />
-
-                    <Route
-                        path="/register"
-                        element={<Register />}
-                    />
-
-                    <Route
-                        path="/forgot"
-                        element={<Forgot />}
-                    />
-
-                </Route>
-
             </Routes>
 
         </Suspense>
-    )
+    );
 }
