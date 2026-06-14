@@ -49,10 +49,6 @@
 // import AdminView from './Wisata/AdminView'
 
 // ── Proyek Dokter Gigi ──
-// ================================================
-// LETAK FILE: src/App.jsx
-// ================================================
-
 import React, { Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 
@@ -65,9 +61,10 @@ import Loading from "./components/Loading";
 import MainLayout from "./layouts/MainLayout";
 import AuthLayout from "./layouts/AuthLayout";
 import GuestLayout from "./layouts/GuestLayout";
+import MemberLayout from "./layouts/MemberLayout";
 
 // ================================================
-// CRM
+// CRM ADMIN
 // ================================================
 
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -101,138 +98,102 @@ const FAQPage = lazy(() => import("./pages/guest/FAQPage"));
 const ContactPage = lazy(() => import("./pages/guest/ContactPage"));
 const AppointmentPage = lazy(() => import("./pages/guest/AppointmentPage"));
 
+// ================================================
+// MEMBER PORTAL
+// ================================================
+
+const DashboardMember = lazy(() => import("./pages/member/DashboardMember"));
+
+const MembershipSaya = lazy(() => import("./pages/member/MembershipSaya"));
+
+const LoyaltyPoint = lazy(() => import("./pages/member/LoyaltyPoint"));
+
+const RiwayatKunjungan = lazy(() => import("./pages/member/RiwayatKunjungan"));
+
+const AppointmentSaya = lazy(() => import("./pages/member/AppointmentSaya"));
+
+const ProfilSaya = lazy(() => import("./pages/member/ProfilSaya"));
+
 export default function App() {
-    return (
-        <Suspense fallback={<Loading />}>
+  return (
+    <Suspense fallback={<Loading />}>
+      <Routes>
+        {/* =====================================
+        GUEST WEBSITE
+    ===================================== */}
 
-            <Routes>
+        <Route element={<GuestLayout />}>
+          <Route path="/" element={<Home />} />
 
-                {/* =====================================
-                    GUEST WEBSITE
-                ===================================== */}
+          <Route path="/services" element={<ServicesPage />} />
 
-                <Route element={<GuestLayout />}>
+          <Route path="/doctors" element={<DoctorsPage />} />
 
-                    <Route
-                        path="/"
-                        element={<Home />}
-                    />
+          <Route path="/membership" element={<MembershipPage />} />
 
-                    <Route
-                        path="/services"
-                        element={<ServicesPage />}
-                    />
+          <Route path="/promo" element={<PromoPage />} />
 
-                    <Route
-                        path="/doctors"
-                        element={<DoctorsPage />}
-                    />
+          <Route path="/faq" element={<FAQPage />} />
 
-                    <Route
-                        path="/membership"
-                        element={<MembershipPage />}
-                    />
+          <Route path="/contact" element={<ContactPage />} />
 
-                    <Route
-                        path="/promo"
-                        element={<PromoPage />}
-                    />
+          <Route path="/appointment" element={<AppointmentPage />} />
+        </Route>
 
-                    <Route
-                        path="/faq"
-                        element={<FAQPage />}
-                    />
+        {/* =====================================
+        AUTH
+    ===================================== */}
 
-                    <Route
-                        path="/contact"
-                        element={<ContactPage />}
-                    />
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<Login />} />
 
-                    <Route
-                        path="/appointment"
-                        element={<AppointmentPage />}
-                    />
+          <Route path="/register" element={<Register />} />
 
-                </Route>
+          <Route path="/forgot" element={<Forgot />} />
+        </Route>
 
-                {/* =====================================
-                    AUTH
-                ===================================== */}
+        {/* =====================================
+        CRM ADMIN
+    ===================================== */}
 
-                <Route element={<AuthLayout />}>
+        <Route element={<MainLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
 
-                    <Route
-                        path="/login"
-                        element={<Login />}
-                    />
+          <Route path="/janji-temu" element={<JanjiTemu />} />
 
-                    <Route
-                        path="/register"
-                        element={<Register />}
-                    />
+          <Route path="/pasien" element={<Pasien />} />
 
-                    <Route
-                        path="/forgot"
-                        element={<Forgot />}
-                    />
+          <Route path="/perawatan" element={<Perawatan />} />
 
-                </Route>
+          <Route path="/rekam-medis" element={<RekamMedis />} />
 
-                {/* =====================================
-                    CRM DASHBOARD
-                ===================================== */}
+          <Route path="/pembayaran" element={<Pembayaran />} />
 
-                <Route element={<MainLayout />}>
+          <Route path="/laporan" element={<Laporan />} />
 
-                    <Route
-                        path="/dashboard"
-                        element={<Dashboard />}
-                    />
+          <Route path="/pengaturan" element={<Pengaturan />} />
 
-                    <Route
-                        path="/janji-temu"
-                        element={<JanjiTemu />}
-                    />
+          <Route path="/components" element={<Components />} />
+        </Route>
 
-                    <Route
-                        path="/pasien"
-                        element={<Pasien />}
-                    />
+        {/* =====================================
+        MEMBER PORTAL
+    ===================================== */}
 
-                    <Route
-                        path="/perawatan"
-                        element={<Perawatan />}
-                    />
+        <Route element={<MemberLayout />}>
+          <Route path="/member" element={<DashboardMember />} />
 
-                    <Route
-                        path="/rekam-medis"
-                        element={<RekamMedis />}
-                    />
+          <Route path="/member/membership" element={<MembershipSaya />} />
 
-                    <Route
-                        path="/pembayaran"
-                        element={<Pembayaran />}
-                    />
+          <Route path="/member/loyalty" element={<LoyaltyPoint />} />
 
-                    <Route
-                        path="/laporan"
-                        element={<Laporan />}
-                    />
+          <Route path="/member/riwayat" element={<RiwayatKunjungan />} />
 
-                    <Route
-                        path="/pengaturan"
-                        element={<Pengaturan />}
-                    />
+          <Route path="/member/appointment" element={<AppointmentSaya />} />
 
-                    <Route
-                        path="/components"
-                        element={<Components />}
-                    />
-
-                </Route>
-
-            </Routes>
-
-        </Suspense>
-    );
+          <Route path="/member/profil" element={<ProfilSaya />} />
+        </Route>
+      </Routes>
+    </Suspense>
+  );
 }
