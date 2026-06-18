@@ -115,7 +115,7 @@ export default function Navbar() {
                         </button>
 
                         <Link
-                            to="/login"
+                            to="/login-member"
                             className="hidden md:block px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition"
                         >
                             Login
@@ -176,7 +176,7 @@ export default function Navbar() {
                         ))}
 
                         <Link
-                            to="/login"
+                            to="/login-member"
                             className="mt-2 px-4 py-3 rounded-xl border text-center"
                         >
                             Login Pasien

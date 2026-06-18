@@ -41,14 +41,6 @@
 
 // export default App
 
-// import './App.css'
-// // import BiodataDiri from './BiodataDiri/BiodataDiri'
-// // import MultiStepForm from './Beasiswa/MultiStepForm'
-// import { useState } from 'react'
-// import GuestView from './Wisata/GuestView'
-// import AdminView from './Wisata/AdminView'
-
-// ── Proyek Dokter Gigi ──
 import React, { Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 
@@ -82,6 +74,7 @@ const Components = lazy(() => import("./pages/Components"));
 // ================================================
 
 const Login = lazy(() => import("./pages/auth/Login"));
+const LoginMember = lazy(() => import("./pages/auth/LoginMember"));
 const Register = lazy(() => import("./pages/auth/Register"));
 const Forgot = lazy(() => import("./pages/auth/Forgot"));
 
@@ -93,6 +86,9 @@ const Home = lazy(() => import("./pages/guest/Home"));
 const ServicesPage = lazy(() => import("./pages/guest/ServicesPage"));
 const DoctorsPage = lazy(() => import("./pages/guest/DoctorsPage"));
 const MembershipPage = lazy(() => import("./pages/guest/MembershipPage"));
+const RegistrasiMembership = lazy(
+  () => import("./pages/guest/RegistrasiMembership"),
+);
 const PromoPage = lazy(() => import("./pages/guest/PromoPage"));
 const FAQPage = lazy(() => import("./pages/guest/FAQPage"));
 const ContactPage = lazy(() => import("./pages/guest/ContactPage"));
@@ -117,11 +113,12 @@ const ProfilSaya = lazy(() => import("./pages/member/ProfilSaya"));
 export default function App() {
   return (
     <Suspense fallback={<Loading />}>
+      {" "}
       <Routes>
+        ```
         {/* =====================================
         GUEST WEBSITE
     ===================================== */}
-
         <Route element={<GuestLayout />}>
           <Route path="/" element={<Home />} />
 
@@ -131,6 +128,11 @@ export default function App() {
 
           <Route path="/membership" element={<MembershipPage />} />
 
+          <Route
+            path="/membership/register"
+            element={<RegistrasiMembership />}
+          />
+
           <Route path="/promo" element={<PromoPage />} />
 
           <Route path="/faq" element={<FAQPage />} />
@@ -139,23 +141,21 @@ export default function App() {
 
           <Route path="/appointment" element={<AppointmentPage />} />
         </Route>
-
         {/* =====================================
         AUTH
     ===================================== */}
-
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
+
+          <Route path="/login-member" element={<LoginMember />} />
 
           <Route path="/register" element={<Register />} />
 
           <Route path="/forgot" element={<Forgot />} />
         </Route>
-
         {/* =====================================
         CRM ADMIN
     ===================================== */}
-
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
 
@@ -175,11 +175,9 @@ export default function App() {
 
           <Route path="/components" element={<Components />} />
         </Route>
-
         {/* =====================================
         MEMBER PORTAL
     ===================================== */}
-
         <Route element={<MemberLayout />}>
           <Route path="/member" element={<DashboardMember />} />
 
