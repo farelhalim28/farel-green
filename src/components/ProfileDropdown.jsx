@@ -20,7 +20,7 @@ export default function ProfileDropdown() {
                     alt="profile"
                 />
                 <div className="hidden md:block">
-                    <p className="text-sm font-semibold text-gray-700 leading-tight">drg. Farel Abdul Halim</p>
+                    <p className="text-sm font-semibold text-gray-700 leading-tight">Administrator</p>
                 </div>
                 <MdExpandMore className="text-gray-400" />
             </div>
@@ -28,8 +28,8 @@ export default function ProfileDropdown() {
             {open && (
                 <div className="absolute right-0 mt-2 w-52 bg-white shadow-xl rounded-2xl border border-gray-100 z-50 overflow-hidden">
                     <div className="px-4 py-3 border-b border-gray-100">
-                        <p className="text-sm font-semibold text-gray-700">drg. Farel Abdul Halim</p>
-                        <p className="text-xs text-gray-400">farel@kliniks.com</p>
+                        <p className="text-sm font-semibold text-gray-700">Administrator</p>
+                        <p className="text-xs text-gray-400">admin123@kliniks.com</p>
                     </div>
                     {[
                         { icon: MdPerson,   label: "Profil Saya" },

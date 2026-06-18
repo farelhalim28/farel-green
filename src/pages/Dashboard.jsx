@@ -91,7 +91,7 @@ export default function Dashboard() {
                         </h1>
 
                         <p className="mt-2 text-blue-100">
-                            Selamat Datang, drg. Farel Abdul Halim 👋
+                            Selamat Datang, Admin klinik 👋
                         </p>
 
                         <p className="text-sm text-blue-200 mt-1">

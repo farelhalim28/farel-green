@@ -25,7 +25,7 @@ export default function ProfilSaya() {
     poin: 850,
     totalKunjungan: 12,
     memberSejak: "10 Januari 2024",
-    dokter: "drg. Farel Abdul Halim",
+    dokter: "Administrator",
     foto: "https://avatar.iran.liara.run/public/girl/10",
   };
 

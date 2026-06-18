@@ -180,7 +180,7 @@ export default function DashboardMember() {
             </p>
 
             <h3 className="font-semibold">
-              drg. Farel Abdul Halim
+              Administrator
             </h3>
 
             <button className="mt-5 bg-blue-600 text-white px-5 py-2 rounded-xl hover:bg-blue-700 transition">
