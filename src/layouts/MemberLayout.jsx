@@ -14,7 +14,7 @@ export default function MemberLayout() {
   const menu = [
     {
       title: "Dashboard",
-      path: "/member",
+      path: "/member/dashboard",
       icon: <MdDashboard />,
     },
     {
