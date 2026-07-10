@@ -22,7 +22,7 @@ const Pembayaran = lazy(() => import("./pages/Pembayaran"));
 const Laporan = lazy(() => import("./pages/Laporan"));
 const Pengaturan = lazy(() => import("./pages/Pengaturan"));
 const Components = lazy(() => import("./pages/Components"));
-const User = lazy(() => import("./pages/User"));
+const User = lazy(() => import("./pages/User")); // Halaman CRUD Member/Pasien
 
 // AUTH
 const Login = lazy(() => import("./pages/auth/Login")); 
@@ -104,6 +104,9 @@ export default function App() {
           <Route path="/member/riwayat" element={<RiwayatKunjungan />} />
           <Route path="/member/appointment" element={<AppointmentSaya />} />
           <Route path="/member/profil" element={<ProfilSaya />} />
+          
+          {/* Tambahan rute kelola user/pasien di dalam portal member */}
+          <Route path="/member/user" element={<User />} /> 
         </Route>
 
         {/* Wildcard fallback */}
