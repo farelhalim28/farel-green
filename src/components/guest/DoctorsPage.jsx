@@ -1,15 +1,9 @@
-// ================================================
-// LETAK FILE: src/pages/guest/DoctorsPage.jsx
-// ================================================
-
 import {
     MdVerified,
     MdSchool,
     MdMedicalServices,
     MdCalendarMonth,
 } from "react-icons/md";
-
-// Import 2 Komponen Baru biar Halaman Makin Panjang & Profesional
 import DoctorProcedureInfo from "../../components/guest/DoctorProcedureInfo";
 import DoctorFaqSection from "../../components/guest/DoctorFaqSection";
 
@@ -23,6 +17,7 @@ export default function DoctorsPage() {
             pengalaman: "8 Tahun",
             sertifikasi: "PDGI Certified",
             jadwal: "Senin - Jumat",
+            // Foto dokter pria ramah & profesional
             foto: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=500&auto=format&fit=crop&q=80",
         },
         {
@@ -32,8 +27,8 @@ export default function DoctorsPage() {
             pengalaman: "10 Tahun",
             sertifikasi: "Orthodontic Specialist",
             jadwal: "Senin - Sabtu",
-            // LINK BARU: Sudah diganti ke aset image Unsplash lain yang lebih stabil
-            foto: "https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=500&auto=format&fit=crop&q=80",
+            // Foto dokter wanita tersenyum ramah
+            foto: "https://images.unsplash.com/photo-1594824813573-246434e33963?w=500&auto=format&fit=crop&q=80",
         },
         {
             id: 3,
@@ -42,6 +37,7 @@ export default function DoctorsPage() {
             pengalaman: "7 Tahun",
             sertifikasi: "Dental Esthetic Certified",
             jadwal: "Selasa - Minggu",
+            // Foto dokter pria kacamata formal medis (No more melet!)
             foto: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=500&auto=format&fit=crop&q=80",
         },
         {
@@ -51,6 +47,7 @@ export default function DoctorsPage() {
             pengalaman: "12 Tahun",
             sertifikasi: "International Implant Academy",
             jadwal: "Senin - Jumat",
+            // Foto dokter wanita senior berwibawa
             foto: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=500&auto=format&fit=crop&q=80",
         },
     ];
@@ -120,7 +117,6 @@ export default function DoctorsPage() {
                                     <p className="text-blue-600 text-sm font-semibold mt-1">
                                         {doctor.spesialis}
                                     </p>
-                                    
                                     <div className="space-y-3 mt-6 text-sm text-gray-600">
                                         <div className="flex items-center gap-2.5">
                                             <MdMedicalServices className="text-blue-500 text-lg" />
@@ -141,7 +137,6 @@ export default function DoctorsPage() {
                                     </div>
                                 </div>
                             </div>
-                            
                             <div className="px-6 pb-6">
                                 <button
                                     className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold text-sm transition duration-200"
@@ -154,10 +149,9 @@ export default function DoctorsPage() {
                 </div>
             </section>
 
-            {/* 1. SEKSI ALUR STERILISASI */}
+            {/* SECTIONS BARU BIAR HALAMAN MAKIN PANJANG & PROFESIONAL */}
             <DoctorProcedureInfo />
             
-            {/* 2. SEKSI TANYA JAWAB / FAQ DOKTER */}
             <DoctorFaqSection />
 
             {/* CTA PENUTUP */}

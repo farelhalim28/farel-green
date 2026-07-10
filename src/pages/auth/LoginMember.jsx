@@ -17,7 +17,7 @@ export default function LoginMember() {
 
     alert("Login Member Berhasil");
 
-    navigate("/member");
+    navigate("/member/dashboard");
   };
 
   return (
