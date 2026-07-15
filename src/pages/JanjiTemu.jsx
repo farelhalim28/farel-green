@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
-// 1. IMPORT API SERVICE DAN API_KEY/URL UNTUK CHANNEL REALTIME
 import { janjiTemuAPI } from "../services/janjiTemuAPI"; 
+import { pasienAPI } from "../services/pasienAPI"; 
+import { dokterAPI } from "../services/dokterAPI";
+import { perawatanAPI } from "../services/perawatanAPI"; 
 import { createClient } from "@supabase/supabase-js";
 
-// Buat instance lokal khusus realtime channel jika dibutuhkan langsung di page
 const supabaseRealtime = createClient(
     "https://hbhzdvmegcebkwalhfmh.supabase.co",
-    "sb_publishable_pOmGQPpegTn7tQMgmE1M1Q_wGvEPcJQ"
+    "sb_publishable_pOmGQPpegTn7tQMGmE1M1Q_wGvEPcJQ"
 );
 
 import {
@@ -17,59 +18,53 @@ import {
     MdAdd,
     MdEdit,
     MdDelete,
+    MdVisibility,
     MdNavigateNext,
     MdNavigateBefore
 } from "react-icons/md";
 
-// Batasi 6 item per halaman supaya pas di grid 3 kolom dan tidak memanjang ke bawah
 const ITEMS_PER_PAGE = 6;
+
+const toLocalDateString = (dateInput) => {
+    const date = dateInput ? new Date(dateInput) : new Date();
+    const tzOffset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
+};
 
 export default function JanjiTemu() {
     const [appointments, setAppointments] = useState([]);
+    const [pasienList, setPasienList] = useState([]);
+    const [dokterList, setDokterList] = useState([]);
+    const [layananList, setLayananList] = useState([]); 
+    
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentData, setCurrentData] = useState(null);
-
-    // STATE UTAMA PAGINATION
+    const [selectedDetail, setSelectedDetail] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
 
+    // Menggunakan perawatan_rencana_id sesuai kolom database asli
     const [formData, setFormData] = useState({
-        nama_pasien: "",
-        no_rm: "",
-        no_telepon: "",
-        dokter: "drg. Farel Abdul Halim",
-        tanggal: "",
-        jam_mulai: "",
-        jam_selesai: "",
-        jenis_perawatan: "Pembersihan Karang Gigi",
-        kategori: "Perawatan Umum",
+        kode_janji: "",
+        pasien_id: "",
+        dokter_id: "",
+        perawatan_rencana_id: "", 
+        tanggal_janji: "",
         keluhan: "-",
-        biaya: 350000,
-        status: "Pending",
-        metode_bayar: "Tunai"
+        status_janji: "Menunggu"
     });
 
-    // FETCH DATA UTAMA & REALTIME SINKRONISASI SUPABASE
     useEffect(() => {
+        fetchInitialData();
         fetchAppointments();
 
         const channel = supabaseRealtime
-            .channel("realtime-appointments")
+            .channel("realtime-janji-temu")
             .on(
                 "postgres_changes",
-                { event: "*", schema: "public", table: "appointments" },
-                (payload) => {
-                    console.log("Ada perubahan data dari Guest/Sistem!", payload);
-                    
-                    if (payload.eventType === "INSERT") {
-                        setAppointments((prev) => [payload.new, ...prev]);
-                    } else if (payload.eventType === "UPDATE") {
-                        setAppointments((prev) =>
-                            prev.map((item) => (item.id === payload.new.id ? payload.new : item))
-                        );
-                    } else if (payload.eventType === "DELETE") {
-                        setAppointments((prev) => prev.filter((item) => item.id !== payload.old.id));
-                    }
+                { event: "*", schema: "public", table: "janji_temu" },
+                () => {
+                    fetchAppointments();
                 }
             )
             .subscribe();
@@ -79,7 +74,6 @@ export default function JanjiTemu() {
         };
     }, []);
 
-    // Proteksi halaman: Reset ke page terakhir jika data menyusut akibat dihapus
     useEffect(() => {
         const totalPages = Math.ceil(appointments.length / ITEMS_PER_PAGE);
         if (currentPage > totalPages && totalPages > 0) {
@@ -87,18 +81,32 @@ export default function JanjiTemu() {
         }
     }, [appointments, currentPage]);
 
+    const fetchInitialData = async () => {
+        try {
+            const [pasienData, dokterData, layananData] = await Promise.all([
+                pasienAPI.fetchPasien ? pasienAPI.fetchPasien() : pasienAPI.fetchPatients(),
+                dokterAPI.fetchDokter(),
+                perawatanAPI.fetchPerawatan()
+            ]);
+            setPasienList(pasienData || []);
+            setDokterList(dokterData || []);
+            setLayananList(layananData || []);
+        } catch (error) {
+            console.error("Gagal menarik data master:", error);
+        }
+    };
+
     const fetchAppointments = async () => {
         setLoading(true);
         try {
             const data = await janjiTemuAPI.fetchAppointments();
             setAppointments(data || []);
         } catch (error) {
-            console.error("Gagal menarik data:", error);
+            console.error("Gagal menarik data janji temu:", error);
         }
         setLoading(false);
     };
 
-    // LOGIKA MATEMATIKA PAGINATION SINKRON
     const totalPages = Math.ceil(appointments.length / ITEMS_PER_PAGE);
     const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
     const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
@@ -106,54 +114,25 @@ export default function JanjiTemu() {
 
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
-        // Efek smooth scroll ke atas daftar janji temu saat pindah halaman
         window.scrollTo({ top: 260, behavior: 'smooth' });
-    };
-
-    const handlePerawatanChange = (perawatan) => {
-        let harga = 350000;
-        if (perawatan === "Tambal Gigi") harga = 450000;
-        if (perawatan === "Cabut Gigi") harga = 500000;
-        if (perawatan === "Bleaching / Pemutihan") harga = 1500000;
-        if (perawatan === "Pemasangan Behel") harga = 6000000;
-        if (perawatan === "Implant Gigi") harga = 8000000;
-
-        setFormData((prev) => ({
-            ...prev,
-            jenis_perawatan: perawatan,
-            biaya: harga
-        }));
     };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        if (name === "jenis_perawatan") {
-            handlePerawatanChange(value);
-        } else {
-            setFormData((prev) => ({
-                ...prev,
-                [name]: name === "biaya" ? Number(value) : value
-            }));
-        }
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     const openCreateModal = () => {
         setCurrentData(null);
         const uniqueNumber = Math.floor(100 + Math.random() * 900);
         setFormData({
-            nama_pasien: "",
-            no_rm: `RM-2026-${uniqueNumber}`,
-            no_telepon: "",
-            dokter: "drg. Farel Abdul Halim",
-            tanggal: new Date().toISOString().split("T")[0],
-            jam_mulai: "09:00",
-            jam_selesai: "09:30",
-            jenis_perawatan: "Pembersihan Karang Gigi",
-            kategori: "Perawatan Umum",
+            kode_janji: `APT-2026-${uniqueNumber}`,
+            pasien_id: pasienList[0]?.id || "",
+            dokter_id: dokterList[0]?.id || "",
+            perawatan_rencana_id: layananList[0]?.id || "", 
+            tanggal_janji: toLocalDateString(new Date()),
             keluhan: "-",
-            biaya: 350000,
-            status: "Pending",
-            metode_bayar: "Tunai"
+            status_janji: "Menunggu"
         });
         setIsModalOpen(true);
     };
@@ -161,19 +140,13 @@ export default function JanjiTemu() {
     const openEditModal = (item) => {
         setCurrentData(item);
         setFormData({
-            nama_pasien: item.nama_pasien,
-            no_rm: item.no_rm,
-            no_telepon: item.no_telepon,
-            dokter: item.dokter,
-            tanggal: item.tanggal,
-            jam_mulai: item.jam_mulai,
-            jam_selesai: item.jam_selesai,
-            jenis_perawatan: item.jenis_perawatan,
-            kategori: item.kategori,
+            kode_janji: item.kode_janji,
+            pasien_id: item.pasien_id ? item.pasien_id.toString() : "",
+            dokter_id: item.dokter_id ? item.dokter_id.toString() : "",
+            perawatan_rencana_id: item.perawatan_rencana_id ? item.perawatan_rencana_id.toString() : "", 
+            tanggal_janji: item.tanggal_janji ? toLocalDateString(item.tanggal_janji) : "",
             keluhan: item.keluhan || "-",
-            biaya: item.biaya,
-            status: item.status,
-            metode_bayar: item.metode_bayar
+            status_janji: item.status_janji
         });
         setIsModalOpen(true);
     };
@@ -181,15 +154,20 @@ export default function JanjiTemu() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            const payload = {
+                kode_janji: formData.kode_janji,
+                pasien_id: parseInt(formData.pasien_id, 10),
+                dokter_id: parseInt(formData.dokter_id, 10),
+                perawatan_rencana_id: parseInt(formData.perawatan_rencana_id, 10), 
+                tanggal_janji: formData.tanggal_janji,
+                keluhan: formData.keluhan,
+                status_janji: formData.status_janji
+            };
+
             if (currentData) {
-                await janjiTemuAPI.updateAppointment(currentData.id, formData);
+                await janjiTemuAPI.updateJanjiTemu(currentData.id, payload);
             } else {
-                const payloadNew = {
-                    ...formData,
-                    no_antrian: "ANT-" + Math.floor(100 + Math.random() * 900),
-                    foto: "https://avatar.iran.liara.run/public/boy/1"
-                };
-                await janjiTemuAPI.createAppointment(payloadNew);
+                await janjiTemuAPI.createJanjiTemu(payload);
             }
             setIsModalOpen(false);
             fetchAppointments();
@@ -201,7 +179,7 @@ export default function JanjiTemu() {
     const handleDelete = async (id) => {
         if (window.confirm("Apakah Anda yakin ingin menghapus jadwal janji temu ini?")) {
             try {
-                await janjiTemuAPI.deleteAppointment(id);
+                await janjiTemuAPI.deleteJanjiTemu(id);
                 fetchAppointments();
             } catch (error) {
                 alert("Gagal menghapus data: " + error.message);
@@ -209,107 +187,107 @@ export default function JanjiTemu() {
         }
     };
 
-    const renderInitialAvatar = (name) => {
-        if (!name) return "?";
-        const initial = name.charAt(0).toUpperCase();
-        const colors = ["bg-blue-600 text-white", "bg-teal-600 text-white", "bg-purple-600 text-white"];
-        const charCode = initial.charCodeAt(0) || 0;
-        return (
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center font-bold text-2xl ${colors[charCode % colors.length]}`}>
-                {initial}
-            </div>
-        );
-    };
-
     const getStatusColor = (status) => {
         switch (status) {
             case "Selesai": return "bg-green-100 text-green-700";
-            case "Confirmed": return "bg-blue-100 text-blue-700";
-            case "Pending": return "bg-yellow-100 text-yellow-700";
-            case "Cancelled": return "bg-red-100 text-red-700";
+            case "Menunggu": return "bg-yellow-100 text-yellow-700";
+            case "Batal": return "bg-red-100 text-red-700";
             default: return "bg-gray-100 text-gray-700";
         }
     };
 
     return (
         <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
-            {/* TOP HEADER HERO */}
             <div className="bg-gradient-to-r from-blue-700 to-blue-500 rounded-3xl p-8 text-white shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold">Janji Temu Pasien (Live DB)</h1>
-                    <p className="text-blue-100 mt-2">Kelola jadwal otomatis sinkron berkala dengan halaman booking guest pasien.</p>
+                    <p className="text-blue-100 mt-2">Kelola jadwal otomatis sinkron berkala dengan database Supabase.</p>
                 </div>
                 <button onClick={openCreateModal} className="bg-white text-blue-700 font-bold px-5 py-3 rounded-2xl shadow-md hover:bg-blue-50 transition-all flex items-center gap-2 cursor-pointer text-sm">
                     <MdAdd className="text-xl" /> Tambah Janji Temu Admin
                 </button>
             </div>
 
-            {/* LIVE KONTROL STATISTIK */}
             <div className="grid md:grid-cols-4 gap-4">
                 <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
                     <h4 className="text-gray-500 font-medium text-sm">Total Jadwal DB</h4>
                     <p className="text-3xl font-bold text-gray-800">{appointments.length}</p>
                 </div>
                 <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                    <h4 className="text-gray-500 font-medium text-sm">Confirmed</h4>
-                    <p className="text-3xl font-bold text-blue-600">{appointments.filter((x) => x.status === "Confirmed").length}</p>
-                </div>
-                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                    <h4 className="text-gray-500 font-medium text-sm">Pending</h4>
-                    <p className="text-3xl font-bold text-yellow-600">{appointments.filter((x) => x.status === "Pending").length}</p>
+                    <h4 className="text-gray-500 font-medium text-sm">Menunggu</h4>
+                    <p className="text-3xl font-bold text-yellow-600">{appointments.filter((x) => x.status_janji === "Menunggu").length}</p>
                 </div>
                 <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
                     <h4 className="text-gray-500 font-medium text-sm">Selesai</h4>
-                    <p className="text-3xl font-bold text-green-600">{appointments.filter((x) => x.status === "Selesai").length}</p>
+                    <p className="text-3xl font-bold text-green-600">{appointments.filter((x) => x.status_janji === "Selesai").length}</p>
+                </div>
+                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                    <h4 className="text-gray-500 font-medium text-sm">Batal</h4>
+                    <p className="text-3xl font-bold text-red-600">{appointments.filter((x) => x.status_janji === "Batal").length}</p>
                 </div>
             </div>
 
-            {/* CARD LIST DENGAN SOLUSI PAGINATION FINAL */}
             {loading ? (
                 <div className="text-center py-20 font-semibold text-gray-400 text-lg">Menghubungkan ke Supabase...</div>
             ) : appointments.length === 0 ? (
                 <div className="text-center py-20 font-semibold text-gray-400 text-lg bg-white rounded-3xl border border-gray-100 shadow-sm">Tidak ada janji temu ditemukan.</div>
             ) : (
                 <div className="space-y-8">
-                    {/* Grid List Item Slicing */}
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                        {currentItems.map((item) => (
-                            <div key={item.id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
-                                <div>
-                                    <div className="flex items-start justify-between gap-2 mb-5">
-                                        <div className="flex items-center gap-4">
-                                            {renderInitialAvatar(item.nama_pasien)}
+                        {currentItems.map((item) => {
+                            // Ambil data relasi perawatan yang ditarik lewat alias "perawatan"
+                            const detailLayanan = item.perawatan;
+                            return (
+                                <div key={item.id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+                                    <div>
+                                        <div className="flex items-start justify-between gap-2 mb-5">
                                             <div>
-                                                <span className="text-[10px] uppercase tracking-wider bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-bold">Dokter: {item.dokter}</span>
-                                                <h3 className="font-bold text-lg text-gray-800 mt-0.5">{item.nama_pasien}</h3>
-                                                <p className="text-gray-400 text-xs font-semibold">{item.no_rm} | Antrian: {item.no_antrian}</p>
+                                                {/* Menggunakan item.dokter.nama sesuai database asli */}
+                                                <span className="text-[10px] uppercase tracking-wider bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-bold">Dokter: {item.dokter?.nama || "-"}</span>
+                                                <h3 className="font-bold text-lg text-gray-800 mt-0.5">{item.pasien?.nama || "Guest Pasien"}</h3>
+                                                <p className="text-gray-400 text-xs font-semibold">Kode: {item.kode_janji}</p>
+                                            </div>
+                                            <div className="flex gap-1 bg-gray-50 p-1.5 rounded-xl border border-gray-100">
+                                                <button onClick={() => setSelectedDetail(item)} className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg cursor-pointer">
+                                                    <MdVisibility size={16} />
+                                                </button>
+                                                <button onClick={() => openEditModal(item)} className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-lg cursor-pointer">
+                                                    <MdEdit size={16} />
+                                                </button>
+                                                <button onClick={() => handleDelete(item.id)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg cursor-pointer">
+                                                    <MdDelete size={16} />
+                                                </button>
                                             </div>
                                         </div>
-                                        <div className="flex gap-1 bg-gray-50 p-1.5 rounded-xl border border-gray-100">
-                                            <button onClick={() => openEditModal(item)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg cursor-pointer"><MdEdit size={16} /></button>
-                                            <button onClick={() => handleDelete(item.id)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg cursor-pointer"><MdDelete size={16} /></button>
+                                        <div className="space-y-3 text-sm border-t border-gray-50 pt-4">
+                                            <div className="flex items-center gap-3">
+                                                <MdCalendarMonth className="text-gray-400 text-lg" />
+                                                <p className="text-gray-600 font-medium">Tanggal: <span className="text-gray-900 font-semibold">{item.tanggal_janji ? new Date(item.tanggal_janji).toLocaleDateString("id-ID") : "-"}</span></p>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <MdAccessTime className="text-gray-400 text-lg" />
+                                                <p className="text-gray-600 font-medium">Waktu: <span className="text-gray-900 font-semibold">{item.tanggal_janji ? new Date(item.tanggal_janji).toLocaleTimeString("id-ID", {hour: '2-digit', minute:'2-digit'}) : "-"} WIB</span></p>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <MdMedicalServices className="text-gray-400 text-lg" />
+                                                <p className="text-gray-600 font-medium">Layanan: <span className="text-gray-900 font-semibold">{detailLayanan?.nama_perawatan || "-"}</span></p>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <MdPayments className="text-gray-400 text-lg" />
+                                                <p className="text-gray-600 font-medium">Biaya: <span className="text-blue-600 font-bold">Rp {detailLayanan?.harga?.toLocaleString("id-ID") || "0"}</span></p>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="space-y-3 text-sm border-t border-gray-50 pt-4">
-                                        <div className="flex items-center gap-3"><MdCalendarMonth className="text-gray-400 text-lg" /><p className="text-gray-600 font-medium">Tanggal: <span className="text-gray-900 font-semibold">{item.tanggal}</span></p></div>
-                                        <div className="flex items-center gap-3"><MdAccessTime className="text-gray-400 text-lg" /><p className="text-gray-600 font-medium">Waktu: <span className="text-gray-900 font-semibold">{item.jam_mulai} - {item.jam_selesai} WIB</span></p></div>
-                                        <div className="flex items-center gap-3"><MdMedicalServices className="text-gray-400 text-lg" /><p className="text-gray-600 font-medium">Perawatan: <span className="text-gray-900 font-semibold">{item.jenis_perawatan}</span></p></div>
-                                        <div className="flex items-center gap-3"><MdPayments className="text-gray-400 text-lg" /><p className="text-gray-600 font-medium">Biaya: <span className="text-blue-600 font-bold">Rp {item.biaya?.toLocaleString("id-ID")}</span></p></div>
-                                        {item.keluhan && <div className="bg-slate-50 p-2 text-xs rounded-lg text-gray-500"><strong>Keluhan:</strong> {item.keluhan}</div>}
+                                    <div className="mt-5 pt-3.5 border-t border-gray-100 flex justify-between items-center">
+                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(item.status_janji)}`}>{item.status_janji}</span>
                                     </div>
                                 </div>
-                                <div className="mt-5 pt-3.5 border-t border-gray-100 flex justify-between items-center">
-                                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(item.status)}`}>{item.status}</span>
-                                    <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-lg font-bold">{item.metode_bayar}</span>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
 
-                    {/* BLOK INTEGRASI UTAMA PAGINATION KOTAK ROUNDED ORANYE */}
                     {totalPages > 1 && (
                         <div className="flex justify-center items-center gap-2 mt-12 pt-4 pb-12">
-                            {/* Tombol Back (<) */}
                             <button
                                 onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
                                 disabled={currentPage === 1}
@@ -318,7 +296,6 @@ export default function JanjiTemu() {
                                 <MdNavigateBefore size={24} />
                             </button>
 
-                            {/* Mapping Angka Nomor Halaman */}
                             {Array.from({ length: totalPages }, (_, index) => {
                                 const pageNum = index + 1;
                                 return (
@@ -326,9 +303,7 @@ export default function JanjiTemu() {
                                         key={pageNum}
                                         onClick={() => handlePageChange(pageNum)}
                                         className={`w-12 h-12 flex items-center justify-center rounded-2xl font-bold text-base transition-all cursor-pointer ${
-                                            currentPage === pageNum
-                                                ? "bg-[#ff7d44] text-white shadow-lg shadow-orange-100 border-b-2 border-orange-600"
-                                                : "border-2 border-gray-200 text-gray-700 bg-white hover:bg-gray-50"
+                                            currentPage === pageNum ? "bg-blue-600 text-white shadow-md" : "border-2 border-gray-200 text-gray-700 bg-white hover:bg-gray-50"
                                         }`}
                                     >
                                         {pageNum}
@@ -336,7 +311,6 @@ export default function JanjiTemu() {
                                 );
                             })}
 
-                            {/* Tombol Next (>) */}
                             <button
                                 onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
                                 disabled={currentPage === totalPages}
@@ -349,89 +323,95 @@ export default function JanjiTemu() {
                 </div>
             )}
 
-            {/* MODAL WINDOWS FORM (CREATE / UPDATE) */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-4">{currentData ? "📝 Modifikasi Janji Temu" : "✨ Buat Jadwal Internal Baru"}</h2>
+                        <h2 className="text-2xl font-bold text-gray-800 mb-4">{currentData ? "📝 Modifikasi Janji Temu" : "✨ Buat Jadwal Baru"}</h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nama Pasien</label>
-                                    <input type="text" name="nama_pasien" required value={formData.nama_pasien} onChange={handleInputChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-blue-500 focus:outline-none"/>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Kode Janji</label>
+                                    <input type="text" name="kode_janji" disabled value={formData.kode_janji} className="w-full px-4 py-2.5 bg-gray-100 text-gray-400 font-medium text-sm rounded-xl cursor-not-allowed"/>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">No Telepon</label>
-                                    <input type="tel" name="no_telepon" required value={formData.no_telepon} onChange={handleInputChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-blue-500 focus:outline-none"/>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Pilih Pasien</label>
+                                    <select name="pasien_id" value={formData.pasien_id} onChange={handleInputChange} required className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-white">
+                                        <option value="" disabled>-- Pilih Pasien --</option>
+                                        {pasienList.map((p) => (
+                                            <option key={p.id} value={p.id}>{p.nama} ({p.kode_pasien || 'Pasien'})</option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">No. Rekam Medis</label>
-                                    <input type="text" name="no_rm" disabled value={formData.no_rm} className="w-full px-4 py-2.5 bg-gray-100 text-gray-400 font-medium text-sm rounded-xl cursor-not-allowed"/>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Dokter Pemeriksa</label>
-                                    <select name="dokter" value={formData.dokter} onChange={handleInputChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-white">
-                                        <option value="drg. Farel Abdul Halim">drg. Farel Abdul Halim</option>
-                                        <option value="drg. Sarah Amanda">drg. Sarah Amanda</option>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Dokter</label>
+                                    <select name="dokter_id" value={formData.dokter_id} onChange={handleInputChange} required className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-white">
+                                        <option value="" disabled>-- Pilih Dokter --</option>
+                                        {dokterList.map((d) => (
+                                            <option key={d.id} value={d.id}>{d.nama}</option>
+                                        ))}
                                     </select>
                                 </div>
-                            </div>
-                            <div className="grid grid-cols-3 gap-3">
-                                <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Tanggal</label><input type="date" name="tanggal" required value={formData.tanggal} onChange={handleInputChange} className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-xs"/></div>
-                                <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Jam Mulai</label><input type="time" name="jam_mulai" required value={formData.jam_mulai} onChange={handleInputChange} className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-xs"/></div>
-                                <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Jam Selesai</label><input type="time" name="jam_selesai" required value={formData.jam_selesai} onChange={handleInputChange} className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-xs"/></div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Perawatan / Layanan</label>
+                                    <select name="perawatan_rencana_id" value={formData.perawatan_rencana_id} onChange={handleInputChange} required className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-white">
+                                        <option value="" disabled>-- Pilih Perawatan --</option>
+                                        {layananList.map((w) => (
+                                            <option key={w.id} value={w.id}>{w.nama_perawatan}</option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Jenis Perawatan</label>
-                                    <select name="jenis_perawatan" value={formData.jenis_perawatan} onChange={handleInputChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-white">
-                                        <option value="Pembersihan Karang Gigi">Pembersihan Karang Gigi</option>
-                                        <option value="Tambal Gigi">Tambal Gigi</option>
-                                        <option value="Cabut Gigi">Cabut Gigi</option>
-                                        <option value="Bleaching / Pemutihan">Bleaching / Pemutihan</option>
-                                        <option value="Pemasangan Behel">Pemasangan Behel</option>
-                                        <option value="Implant Gigi">Implant Gigi</option>
-                                    </select>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Tanggal Waktu</label>
+                                    <input type="datetime-local" name="tanggal_janji" required value={formData.tanggal_janji} onChange={handleInputChange} className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm"/>
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Kategori</label>
-                                    <select name="kategori" value={formData.kategori} onChange={handleInputChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-white">
-                                        <option value="Perawatan Umum">Perawatan Umum</option>
-                                        <option value="Perawatan Khusus">Perawatan Khusus</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-3 gap-3">
-                                <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Biaya (Rp)</label><input type="number" name="biaya" required value={formData.biaya} onChange={handleInputChange} className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm"/></div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Status</label>
-                                    <select name="status" value={formData.status} onChange={handleInputChange} className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm bg-white">
-                                        <option value="Pending">Pending</option>
-                                        <option value="Confirmed">Confirmed</option>
+                                    <select name="status_janji" value={formData.status_janji} onChange={handleInputChange} className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm bg-white">
+                                        <option value="Menunggu">Menunggu</option>
                                         <option value="Selesai">Selesai</option>
-                                        <option value="Cancelled">Cancelled</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Metode Bayar</label>
-                                    <select name="metode_bayar" value={formData.metode_bayar} onChange={handleInputChange} className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm bg-white">
-                                        <option value="Tunai">Tunai</option>
-                                        <option value="Transfer">Transfer</option>
-                                        <option value="Qris">Qris</option>
+                                        <option value="Batal">Batal</option>
                                     </select>
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Keluhan Pasien</label>
-                                <textarea name="keluhan" rows="2" value={formData.keluhan} onChange={handleInputChange} className="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm" placeholder="Tulis keluhan singkat..."></textarea>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Keluhan</label>
+                                <textarea name="keluhan" rows="2" value={formData.keluhan} onChange={handleInputChange} className="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm"></textarea>
                             </div>
                             <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
                                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 rounded-xl text-gray-500 bg-gray-100 font-bold text-sm">Batal</button>
-                                <button type="submit" className="px-5 py-2.5 rounded-xl text-white bg-blue-600 font-bold text-sm shadow-md">Simpan ke DB</button>
+                                <button type="submit" className="px-5 py-2.5 rounded-xl text-white bg-blue-600 font-bold text-sm shadow-md">Simpan</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {selectedDetail && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative">
+                        <h2 className="text-xl font-bold text-gray-800 border-b pb-3 mb-4 flex items-center gap-2 text-blue-600">
+                            <MdVisibility /> Detail Janji Temu
+                        </h2>
+                        {(() => {
+                            const detailLayanan = selectedDetail.perawatan;
+                            return (
+                                <div className="space-y-4 text-sm text-gray-700">
+                                    <p><strong>Kode Janji:</strong> {selectedDetail.kode_janji}</p>
+                                    <p><strong>Pasien:</strong> {selectedDetail.pasien?.nama || "-"}</p>
+                                    <p><strong>Dokter:</strong> {selectedDetail.dokter?.nama || "-"}</p>
+                                    <p><strong>Layanan:</strong> {detailLayanan?.nama_perawatan || "-"}</p>
+                                    <p><strong>Biaya:</strong> Rp {detailLayanan?.harga?.toLocaleString("id-ID") || "0"}</p>
+                                    <p><strong>Keluhan:</strong> {selectedDetail.keluhan || "-"}</p>
+                                    <div className="flex justify-end pt-4">
+                                        <button type="button" onClick={() => setSelectedDetail(null)} className="px-5 py-2 rounded-xl text-white bg-blue-600 font-bold text-sm">Tutup</button>
+                                    </div>
+                                </div>
+                            );
+                        })()}
                     </div>
                 </div>
             )}

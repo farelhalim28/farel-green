@@ -16,6 +16,7 @@ import MemberLayout from "./layouts/MemberLayout";
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const JanjiTemu = lazy(() => import("./pages/JanjiTemu"));
 const Pasien = lazy(() => import("./pages/Pasien"));
+const Dokter = lazy(() => import("./pages/Dokter")); // LAZY LOAD DOKTER BARU!
 const Perawatan = lazy(() => import("./pages/Perawatan"));
 const RekamMedis = lazy(() => import("./pages/RekamMedis"));
 const Pembayaran = lazy(() => import("./pages/Pembayaran"));
@@ -85,6 +86,7 @@ export default function App() {
           <Route path="/admin/dashboard" element={<Dashboard />} />
           <Route path="/admin/janji-temu" element={<JanjiTemu />} />
           <Route path="/admin/pasien" element={<Pasien />} />
+          <Route path="/admin/dokter" element={<Dokter />} /> {/* ROUTE DOKTER BARU DISINI */}
           <Route path="/admin/perawatan" element={<Perawatan />} />
           <Route path="/admin/rekam-medis" element={<RekamMedis />} />
           <Route path="/admin/pembayaran" element={<Pembayaran />} />

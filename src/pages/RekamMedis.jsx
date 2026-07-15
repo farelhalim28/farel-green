@@ -1,15 +1,10 @@
-// ================================================
-// LETAK FILE: src/pages/RekamMedis.jsx
-// VERSI FULL SINKRON: CRUD REKAM MEDIS LENGKAP + UI PREMIUM
-// ================================================
-
 import { useState, useEffect, useRef } from "react";
 import { 
     MdSearch, MdVisibility, MdDelete, MdEdit, 
-    MdAdd, MdFilterList, MdCalendarMonth, MdPerson,
-    MdAssignment, MdSick, MdHealing, MdRateReview,
-    MdMedicalServices
+    MdAdd, MdFilterList, MdCalendarToday, MdAssignment,
+    MdMedicalServices, MdRateReview, MdPerson, MdNavigateBefore, MdNavigateNext
 } from "react-icons/md";
+import { FaFileMedical, FaUserMd } from "react-icons/fa";
 
 // ── Import komponen Dialog/Modal dari shadcn/ui ──
 import {
@@ -31,47 +26,120 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-import recordsData from "../data/medical_records.json";
+// ── IMPORT API SERVICES ──
+import { rekamMedisAPI } from "../services/rekamMedisAPI";
+import { pasienAPI } from "../services/pasienAPI";
+import { perawatanAPI } from "../services/perawatanAPI";
+import { dokterAPI } from "../services/dokterAPI"; 
 
 export default function RekamMedis() {
-    const [recordsList, setRecordsList] = useState(recordsData);
+    const [recordsList, setRecordsList] = useState([]);
+    const [pasienList, setPasienList] = useState([]);
+    const [perawatanList, setPerawatanList] = useState([]);
+    const [dokterList, setDokterList] = useState([]); 
+    
+    const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
-    const [filterDokter, setFilterDokter] = useState("Semua");
+    const [filterPerawatan, setFilterPerawatan] = useState("Semua");
 
-    // State Modal & CRUD Management
+    // ── Pagination State ──
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 7;
+
+    // State Modal Management (Variabel Utama Tetap selectedRecord)
     const [selectedRecord, setSelectedRecord] = useState(null);
     const [dialogOpen, setDialogOpen] = useState(false);
-    const [dialogMode, setDialogMode] = useState("detail"); // tambah, detail, edit, hapus
+    const [dialogMode, setDialogMode] = useState("detail"); // "detail" | "tambah" | "edit" | "hapus"
 
-    // State Form Input untuk Tambah & Edit Rekam Medis
-    const [formNoRM, setFormNoRM] = useState("");
-    const [formPatientId, setFormPatientId] = useState("");
-    const [formTanggal, setFormTanggal] = useState("2026-07-08");
-    const [formKeluhan, setFormKeluhan] = useState("");
-    const [formDiagnosa, setFormDiagnosa] = useState("");
-    const [formTindakan, setFormTindakan] = useState("");
-    const [formCatatan, setFormCatatan] = useState("");
-    const [formDokter, setFormDokter] = useState("drg. Farel Abdul Halim");
+    // Form Inputs State (SINKRON DENGAN KOLOM DATABASE SUPABASE)
+    const [formPasienId, setFormPasienId] = useState("");
+    const [formDokterId, setFormDokterId] = useState(""); 
+    const [formPerawatanId, setFormPerawatanId] = useState("");
+    const [formTanggal, setFormTanggal] = useState("");
+    const [formCatatanDokter, setFormCatatanDokter] = useState(""); // Menampung catatan_dokter
 
     const searchInputRef = useRef(null);
 
-    useEffect(() => {
-        document.title = "Rekam Medis — SIGIGI";
-        if (searchInputRef.current) {
-            searchInputRef.current.focus();
+    // Load semua data master dari Supabase
+    const loadAllMasterData = async () => {
+        try {
+            setLoading(true);
+            const [records, pasiens, perawatans, dokters] = await Promise.all([
+                rekamMedisAPI.fetchRekamMedis(),
+                pasienAPI.fetchPasien ? pasienAPI.fetchPasien() : pasienAPI.fetchPatients(),
+                perawatanAPI.fetchPerawatan ? perawatanAPI.fetchPerawatan() : perawatanAPI.fetchLayanan(),
+                dokterAPI.fetchDokter ? dokterAPI.fetchDokter() : dokterAPI.fetchDoctors()
+            ]);
+
+            setRecordsList(records || []);
+            setPasienList(pasiens || []);
+            setPerawatanList(perawatans || []);
+            setDokterList(dokters || []);
+        } catch (error) {
+            console.error("Gagal sinkronisasi data master Rekam Medis:", error);
+        } finally {
+            setLoading(false);
         }
+    };
+
+    useEffect(() => {
+        loadAllMasterData();
+        if (searchInputRef.current) searchInputRef.current.focus();
     }, []);
 
-    // ── KUMPULAN AKSI CRUD ──
+    // Filter data berdasarkan nama pasien dan jenis perawatan
+    const filteredRecords = recordsList.filter((item) => {
+        const namaPasien = item.pasien?.nama || "";
+        const namaPerawatan = item.perawatan?.nama_perawatan || "";
+
+        const matchesSearch = namaPasien.toLowerCase().includes(search.toLowerCase());
+        const matchesFilter = filterPerawatan === "Semua" || namaPerawatan === filterPerawatan;
+
+        return matchesSearch && matchesFilter;
+    });
+
+    // Pagination Formula
+    const totalPages = Math.ceil(filteredRecords.length / itemsPerPage) || 1;
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredRecords.slice(indexOfFirstItem, indexOfLastItem);
+
+    const renderPaginationButtons = () => {
+        const buttons = [];
+        for (let i = 1; i <= totalPages; i++) {
+            buttons.push(
+                <button
+                    key={i}
+                    onClick={() => setCurrentPage(i)}
+                    className={`w-8 h-8 font-bold rounded-lg transition text-xs cursor-pointer ${
+                        currentPage === i
+                            ? "bg-blue-700 text-white shadow-sm border border-blue-700"
+                            : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                    }`}
+                >
+                    {i}
+                </button>
+            );
+        }
+        return buttons;
+    };
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search, filterPerawatan]);
+
+    // Modal Actions Trigger (Sudah diperbaiki dari selectedItem -> selectedRecord)
     const openTambah = () => {
-        setFormNoRM("");
-        setFormPatientId("");
-        setFormTanggal("2026-07-08");
-        setFormKeluhan("");
-        setFormDiagnosa("");
-        setFormTindakan("");
-        setFormCatatan("");
-        setFormDokter("drg. Farel Abdul Halim");
+        if (pasienList.length === 0 || perawatanList.length === 0 || dokterList.length === 0) {
+            alert("Harap pastikan data master Pasien, Perawatan, dan Dokter sudah tersedia!");
+            return;
+        }
+        setSelectedRecord(null);
+        setFormPasienId(pasienList[0]?.id.toString());
+        setFormDokterId(dokterList[0]?.id.toString());
+        setFormPerawatanId(perawatanList[0]?.id.toString());
+        setFormTanggal(new Date().toISOString().split("T")[0]);
+        setFormCatatanDokter("");
         setDialogMode("tambah");
         setDialogOpen(true);
     };
@@ -84,14 +152,11 @@ export default function RekamMedis() {
 
     const openEdit = (item) => {
         setSelectedRecord(item);
-        setFormNoRM(item.no_rm);
-        setFormPatientId(item.patient_id);
-        setFormTanggal(item.tanggal);
-        setFormKeluhan(item.keluhan);
-        setFormDiagnosa(item.diagnosa);
-        setFormTindakan(item.tindakan);
-        setFormCatatan(item.catatan_dokter);
-        setFormDokter(item.dokter);
+        setFormPasienId(item.pasien_id?.toString() || item.id_pasien?.toString() || "");
+        setFormDokterId(item.dokter_id?.toString() || item.id_dokter?.toString() || "");
+        setFormPerawatanId(item.perawatan_id?.toString() || item.id_perawatan?.toString() || "");
+        setFormTanggal(item.tanggal_periksa ? item.tanggal_periksa.split("T")[0] : "");
+        setFormCatatanDokter(item.catatan_dokter || ""); // Ambil kolom catatan_dokter dari database
         setDialogMode("edit");
         setDialogOpen(true);
     };
@@ -102,415 +167,361 @@ export default function RekamMedis() {
         setDialogOpen(true);
     };
 
-    const handleCreate = (e) => {
+    // Form Submit Handlers
+    const handleCreate = async (e) => {
         e.preventDefault();
-        if (!formNoRM || !formKeluhan || !formDiagnosa) return alert("Nomor RM, Keluhan, dan Diagnosa wajib diisi!");
-
-        const nextId = recordsList.length > 0 ? Math.max(...recordsList.map(r => r.id)) + 1 : 1;
-        const newRecord = {
-            id: nextId,
-            no_rm: formNoRM,
-            patient_id: formPatientId || String(nextId),
-            tanggal: formTanggal,
-            keluhan: formKeluhan,
-            diagnosa: formDiagnosa,
-            tindakan: formTindakan || "Konsultasi",
-            catatan_dokter: formCatatan || "Tidak ada catatan khusus",
-            dokter: formDokter
+        const payload = {
+            pasien_id: parseInt(formPasienId),
+            dokter_id: parseInt(formDokterId),
+            perawatan_id: parseInt(formPerawatanId),
+            tanggal_periksa: formTanggal,
+            catatan_dokter: formCatatanDokter // Sinkron key database
         };
 
-        setRecordsList([newRecord, ...recordsList]);
-        setDialogOpen(false);
+        try {
+            await rekamMedisAPI.createRekamMedis(payload);
+            loadAllMasterData();
+            setDialogOpen(false);
+        } catch (error) {
+            alert("Gagal menyimpan rekam medis baru: " + error.message);
+        }
     };
 
-    const handleUpdate = (e) => {
+    const handleUpdate = async (e) => {
         e.preventDefault();
-        setRecordsList(recordsList.map(r => {
-            if (r.id === selectedRecord.id) {
-                return {
-                    ...r,
-                    no_rm: formNoRM,
-                    patient_id: formPatientId,
-                    tanggal: formTanggal,
-                    keluhan: formKeluhan,
-                    diagnosa: formDiagnosa,
-                    tindakan: formTindakan,
-                    catatan_dokter: formCatatan,
-                    dokter: formDokter
-                };
-            }
-            return r;
-        }));
-        setDialogOpen(false);
+        const payload = {
+            pasien_id: parseInt(formPasienId),
+            dokter_id: parseInt(formDokterId),
+            perawatan_id: parseInt(formPerawatanId),
+            tanggal_periksa: formTanggal,
+            catatan_dokter: formCatatanDokter // Sinkron key database
+        };
+
+        try {
+            await rekamMedisAPI.updateRekamMedis(selectedRecord.id, payload);
+            loadAllMasterData();
+            setDialogOpen(false);
+        } catch (error) {
+            alert("Gagal mengupdate data rekam medis: " + error.message);
+        }
     };
 
-    const handleDelete = (id) => {
-        setRecordsList(recordsList.filter(r => r.id !== id));
-        setDialogOpen(false);
+    const handleDelete = async (id) => {
+        try {
+            await rekamMedisAPI.deleteRekamMedis(id);
+            setRecordsList(recordsList.filter((r) => r.id !== id));
+            setDialogOpen(false);
+        } catch (error) {
+            alert("Gagal menghapus log rekam medis: " + error.message);
+        }
     };
-
-    // ── FILTER DATA LOGIC ──
-    const filteredRecords = recordsList.filter((item) => {
-        const matchSearch = 
-            item.no_rm.toLowerCase().includes(search.toLowerCase()) ||
-            String(item.patient_id).toLowerCase().includes(search.toLowerCase()) ||
-            item.diagnosa.toLowerCase().includes(search.toLowerCase());
-        const matchDokter = 
-            filterDokter === "Semua" || item.dokter === filterDokter;
-
-        return matchSearch && matchDokter;
-    });
-
-    const listDokterUnik = ["Semua", ...new Set(recordsList.map(r => r.dokter))];
 
     return (
-        <div className="p-6 space-y-6 bg-gray-50/40 min-h-screen font-sans">
+        <div className="p-6 space-y-6 bg-slate-50/50 min-h-screen font-sans">
             
-            {/* HEADER */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white rounded-3xl p-6 shadow-sm border border-gray-100 gap-4">
+            {/* HERO HEADER */}
+            <div className="bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-600 rounded-3xl p-8 text-white shadow-md flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
-                        <MdAssignment className="text-blue-600 text-3xl" /> Rekam Medis
+                    <h1 className="text-3xl font-extrabold tracking-tight flex items-center gap-3">
+                        <FaFileMedical /> Rekam Medis Pasien
                     </h1>
-                    <p className="text-sm font-medium text-gray-400 mt-1">
-                        Daftar riwayat pemeriksaan, diagnosa klinis, dan catatan tindakan medis pasien secara realtime.
+                    <p className="text-blue-100 mt-1.5 text-sm font-medium opacity-90">
+                        Pencatatan riwayat medis gigi, tindakan klinis, dan catatan dokter pemeriksa secara terintegrasi.
                     </p>
                 </div>
-                <button
-                    onClick={openTambah}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 h-11 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-blue-200 hover:scale-[1.02] cursor-pointer w-full sm:w-auto justify-center"
-                >
-                    <MdAdd size={18} /> Tambah Rekam Medis
-                </button>
             </div>
 
-            {/* FILTER & PENCARIAN BAR */}
-            <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-4 items-center justify-between">
-                <div className="relative w-full sm:flex-1">
+            {/* BAR FILTER & PENCARIAN */}
+            <div className="flex flex-col md:flex-row gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                <div className="flex-1 relative">
                     <MdSearch className="absolute left-4 top-3.5 text-gray-400 text-xl" />
                     <input
                         ref={searchInputRef}
                         type="text"
-                        placeholder="Cari berdasarkan No. RM, Patient ID, atau jenis diagnosa..."
+                        placeholder="Cari pasien berdasarkan nama..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 text-sm font-medium rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-gray-400"
+                        className="w-full pl-11 pr-4 py-2.5 text-xs font-semibold rounded-xl border border-gray-100 bg-slate-50/60 outline-none focus:ring-2 focus:ring-blue-500/20"
                     />
                 </div>
+                <div className="flex gap-3 items-center">
+                    <span className="text-gray-400 text-[11px] font-bold uppercase whitespace-nowrap">Filter Perawatan:</span>
+                    <Select value={filterPerawatan} onValueChange={setFilterPerawatan}>
+                        <SelectTrigger className="w-[200px] h-[40px] rounded-xl text-xs font-bold border-gray-100 bg-white">
+                            <SelectValue placeholder="Semua Perawatan" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-gray-100">
+                            <SelectItem value="Semua" className="text-xs font-bold">Semua Perawatan</SelectItem>
+                            {perawatanList.map((p) => (
+                                <SelectItem key={p.id} value={p.nama_perawatan} className="text-xs font-semibold">
+                                    {p.nama_perawatan}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    
+                    <button
+                        onClick={openTambah}
+                        className="bg-blue-700 hover:bg-blue-800 text-white px-5 h-[40px] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer whitespace-nowrap"
+                    >
+                        <MdAdd size={16} /> Tambah Log Medis
+                    </button>
+                </div>
+            </div>
 
-                <div className="flex gap-3 w-full sm:w-auto items-center justify-between">
-                    <div className="flex flex-col w-full sm:w-[200px]">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase mb-1 px-1 tracking-wider">Dokter Pemeriksa</span>
-                        <Select value={filterDokter} onValueChange={setFilterDokter}>
-                            <SelectTrigger className="rounded-xl border-gray-200 font-semibold text-xs h-11 bg-slate-50/50">
-                                <SelectValue placeholder="Semua Dokter" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white rounded-xl shadow-lg border-gray-100">
-                                {listDokterUnik.map((doc, i) => (
-                                    <SelectItem key={i} value={doc}>{doc === "Semua" ? "Semua Dokter" : doc}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
+            {/* TABEL UTAMA */}
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                        <thead>
+                            <tr className="bg-slate-50 border-b border-gray-100 text-slate-400 text-[11px] uppercase font-bold tracking-wider">
+                                <th className="p-4 text-left w-24">ID Log</th>
+                                <th className="p-4 text-left">Pasien</th>
+                                <th className="p-4 text-left">Dokter Pemeriksa</th>
+                                <th className="p-4 text-left">Tindakan Perawatan</th>
+                                <th className="p-4 text-left">Catatan Dokter</th>
+                                <th className="p-4 text-left w-32">Tanggal Periksa</th>
+                                <th className="p-4 text-center w-32">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody className="text-xs font-semibold text-gray-600 divide-y divide-gray-50">
+                            {loading ? (
+                                <tr>
+                                    <td colSpan="7" className="p-8 text-center text-gray-400 font-medium">🔄 Sedang menyinkronkan rekam medis...</td>
+                                </tr>
+                            ) : currentItems.length === 0 ? (
+                                <tr>
+                                    <td colSpan="7" className="p-8 text-center text-gray-400 font-medium">❌ Belum ada riwayat rekam medis tercatat.</td>
+                                </tr>
+                            ) : (
+                                currentItems.map((item) => (
+                                    <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                                        <td className="p-4 text-indigo-600 font-bold font-mono">#{item.id}</td>
+                                        <td className="p-4">
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="w-8 h-8 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center font-bold">
+                                                    <MdPerson size={16} />
+                                                </div>
+                                                <span className="font-bold text-gray-900">{item.pasien?.nama || "Tidak Diketahui"}</span>
+                                            </div>
+                                        </td>
+                                        {/* KOLOM DOKTER PEMERIKSA SUDAH MUNCUL DARI DATA REAL DOKTER */}
+                                        <td className="p-4 text-gray-800 font-bold">
+                                            <div className="flex items-center gap-2">
+                                                <FaUserMd className="text-indigo-600" size={14} />
+                                                <span>{item.dokter?.nama_dokter || item.dokter?.nama || "Dokter Jaga"}</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-4 text-indigo-700 font-bold">
+                                            <span className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg">
+                                                {item.perawatan?.nama_perawatan || "Tindakan Umum"}
+                                            </span>
+                                        </td>
+                                        {/* KOLOM CATATAN DOKTER DARI DATABASE */}
+                                        <td className="p-4 text-gray-500 max-w-[200px] truncate" title={item.catatan_dokter}>
+                                            {item.catatan_dokter || "-"}
+                                        </td>
+                                        <td className="p-4 font-mono text-slate-500">
+                                            <span className="flex items-center gap-1">
+                                                <MdCalendarToday className="text-gray-400" size={14} /> 
+                                                {item.tanggal_periksa ? new Date(item.tanggal_periksa).toLocaleDateString("id-ID") : "-"}
+                                            </span>
+                                        </td>
+                                        <td className="p-4 text-center">
+                                            <div className="flex items-center justify-center gap-1.5">
+                                                <button onClick={() => openDetail(item)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all cursor-pointer">
+                                                    <MdVisibility size={18} />
+                                                </button>
+                                                <button onClick={() => openEdit(item)} className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-lg transition-all cursor-pointer">
+                                                    <MdEdit size={18} />
+                                                </button>
+                                                <button onClick={() => openHapus(item)} className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-all cursor-pointer">
+                                                    <MdDelete size={18} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
 
-                    <div className="hidden sm:flex self-end h-11 px-4 items-center justify-center bg-blue-50 text-blue-600 rounded-xl text-xs font-bold gap-1">
-                        <MdFilterList size={16} /> {filteredRecords.length} Data
+                {/* PAGINATION PANEL */}
+                <div className="p-4 bg-slate-50 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-bold text-gray-500">
+                    <p>
+                        Menampilkan <span className="text-gray-800">{currentItems.length ? indexOfFirstItem + 1 : 0}</span>-
+                        <span className="text-gray-800">{indexOfFirstItem + currentItems.length}</span> dari <span className="text-blue-600">{filteredRecords.length}</span> log medis
+                    </p>
+                    <div className="flex items-center gap-1.5">
+                        <button 
+                            disabled={currentPage === 1 || loading}
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            className="w-8 h-8 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition cursor-pointer flex items-center justify-center shadow-sm"
+                        >
+                            <MdNavigateBefore size={18} />
+                        </button>
+                        {renderPaginationButtons()}
+                        <button 
+                            disabled={currentPage === totalPages || loading}
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            className="w-8 h-8 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition cursor-pointer flex items-center justify-center shadow-sm"
+                        >
+                            <MdNavigateNext size={18} />
+                        </button>
                     </div>
                 </div>
             </div>
 
-            {/* GRID LAYOUT KARTU REKAM MEDIS */}
-            {filteredRecords.length === 0 ? (
-                <div className="bg-white rounded-3xl p-16 text-center shadow-sm border border-gray-100 text-gray-400 font-medium text-sm">
-                    ❌ Tidak ada rekam medis pasien yang sesuai dengan pencarian atau filter dokter.
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {filteredRecords.map((item) => (
-                        <div
-                            key={item.id}
-                            className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-300 flex flex-col justify-between group relative"
-                        >
-                            <div>
-                                {/* Atas: Info Identitas Utama */}
-                                <div className="flex justify-between items-start mb-4 border-b border-gray-50 pb-3">
-                                    <div>
-                                        <h3 className="font-extrabold text-gray-800 text-lg tracking-tight group-hover:text-blue-600 transition-colors">
-                                            {item.no_rm}
-                                        </h3>
-                                        <p className="text-xs font-semibold text-gray-400 mt-0.5">
-                                            Patient ID : <span className="font-mono text-gray-600">{item.patient_id}</span>
-                                        </p>
-                                    </div>
-                                    <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                                        <MdMedicalServices size={20} />
-                                    </div>
-                                </div>
-
-                                {/* Konten Tengah: Tanggal & Detail Klinis */}
-                                <div className="space-y-3.5 text-sm font-medium">
-                                    <p className="flex items-center gap-1.5 text-xs text-gray-400 font-bold">
-                                        <MdCalendarMonth size={16} /> {item.tanggal}
-                                    </p>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
-                                        <div className="p-2.5 bg-slate-50/60 rounded-xl border border-gray-50/50">
-                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1"><MdSick/> Keluhan</span>
-                                            <p className="text-gray-700 mt-1 font-semibold leading-relaxed line-clamp-2">{item.keluhan}</p>
-                                        </div>
-                                        <div className="p-2.5 bg-blue-50/30 rounded-xl border border-blue-50/40">
-                                            <span className="text-[10px] font-bold text-blue-500 uppercase tracking-wider flex items-center gap-1"><MdHealing/> Diagnosa</span>
-                                            <p className="text-blue-900 mt-1 font-bold leading-relaxed line-clamp-2">{item.diagnosa}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-1.5 text-xs pt-1">
-                                        <p className="text-gray-700"><strong className="text-gray-400 font-bold uppercase text-[10px] tracking-wider block">Tindakan Medis:</strong> {item.tindakan}</p>
-                                        <p className="text-gray-600 italic bg-gray-50/80 p-2.5 rounded-xl border border-gray-100 text-xs"><strong className="text-gray-400 font-bold uppercase text-[10px] tracking-wider block not-italic mb-0.5">Catatan Dokter:</strong> "{item.catatan_dokter}"</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Bawah: Info Dokter & Aksi Kontrol (SINKRON) */}
-                            <div className="mt-5 pt-3 border-t border-gray-50 flex items-center justify-between">
-                                <p className="flex items-center gap-1.5 text-blue-600 font-bold text-xs bg-blue-50/50 px-3 py-1.5 rounded-xl">
-                                    <MdPerson size={16} /> {item.dokter}
-                                </p>
-
-                                <div className="flex items-center gap-0.5">
-                                    <button 
-                                        onClick={() => openDetail(item)}
-                                        title="Lihat Berkas"
-                                        className="p-2 rounded-xl text-blue-600 hover:bg-blue-50 transition cursor-pointer"
-                                    >
-                                        <MdVisibility size={18} />
-                                    </button>
-                                    <button 
-                                        onClick={() => openEdit(item)}
-                                        title="Ubah Berkas"
-                                        className="p-2 rounded-xl text-blue-600 hover:bg-blue-50 transition cursor-pointer"
-                                    >
-                                        <MdEdit size={18} />
-                                    </button>
-                                    <button 
-                                        onClick={() => openHapus(item)}
-                                        title="Hapus Berkas"
-                                        className="p-2 rounded-xl text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                                    >
-                                        <MdDelete size={18} />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {/* SYSTEM DIALOG / MODAL (TAMBAH, DETAIL, EDIT, HAPUS) */}
+            {/* MODAL DIALOG CONTROLLER */}
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogContent className="max-w-md rounded-3xl p-6 bg-white shadow-2xl border border-gray-100 overflow-hidden">
+                <DialogContent className="max-w-md rounded-3xl p-6 bg-white border border-gray-100 shadow-xl">
                     
-                    {/* FORM TAMBAH & EDIT */}
+                    {/* FORM TAMBAH / EDIT */}
                     {(dialogMode === "tambah" || dialogMode === "edit") && (
                         <form onSubmit={dialogMode === "tambah" ? handleCreate : handleUpdate} className="space-y-4">
                             <DialogHeader>
-                                <DialogTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                                    <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
-                                        {dialogMode === "tambah" ? <MdAdd size={20}/> : <MdEdit size={20}/>}
-                                    </div>
-                                    {dialogMode === "tambah" ? "Tambah Rekam Medis Baru" : "Perbarui Rekam Medis"}
+                                <DialogTitle className="text-base font-extrabold text-gray-900">
+                                    {dialogMode === "tambah" ? "✨ Tambah Log Rekam Medis" : "📝 Edit Log Rekam Medis"}
                                 </DialogTitle>
-                                <DialogDescription className="text-xs text-gray-400">
-                                    Pastikan data diagnosis dan tindakan klinis diisi dengan akurat.
-                                </DialogDescription>
                             </DialogHeader>
+                            
+                            <div className="space-y-3 pt-2">
+                                <div>
+                                    <label className="text-[10px] uppercase font-bold text-gray-400 block mb-1">Nama Pasien</label>
+                                    <Select value={formPasienId} onValueChange={setFormPasienId}>
+                                        <SelectTrigger className="w-full h-[36px] text-xs font-semibold border-gray-200 rounded-xl">
+                                            <SelectValue placeholder="Pilih Pasien" />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-xl">
+                                            {pasienList.map(p => (
+                                                <SelectItem key={p.id} value={p.id.toString()} className="text-xs font-medium">{p.nama}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
 
-                            <div className="space-y-3 text-xs">
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-wider">No. Rekam Medis *</label>
-                                        <input 
-                                            type="text" required placeholder="RM-2026-00X" value={formNoRM} onChange={(e)=>setFormNoRM(e.target.value)}
-                                            className="w-full p-3 rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-blue-500/20 font-bold tracking-wide"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-wider">Patient ID</label>
-                                        <input 
-                                            type="text" placeholder="ID Pasien" value={formPatientId} onChange={(e)=>setFormPatientId(e.target.value)}
-                                            className="w-full p-3 rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-blue-500/20 font-medium"
-                                        />
-                                    </div>
+                                <div>
+                                    <label className="text-[10px] uppercase font-bold text-gray-400 block mb-1">Dokter Pemeriksa</label>
+                                    <Select value={formDokterId} onValueChange={setFormDokterId}>
+                                        <SelectTrigger className="w-full h-[36px] text-xs font-semibold border-gray-200 rounded-xl">
+                                            <SelectValue placeholder="Pilih Dokter" />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-xl">
+                                            {dokterList.map(d => (
+                                                <SelectItem key={d.id} value={d.id.toString()} className="text-xs font-medium">
+                                                    {d.nama_dokter || d.nama}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-wider">Tanggal Periksa</label>
-                                        <input 
-                                            type="date" value={formTanggal} onChange={(e)=>setFormTanggal(e.target.value)}
-                                            className="w-full p-3 rounded-xl border border-gray-200 outline-none font-medium text-gray-700 bg-white"
-                                        />
+                                        <label className="text-[10px] uppercase font-bold text-gray-400 block mb-1">Tindakan</label>
+                                        <Select value={formPerawatanId} onValueChange={setFormPerawatanId}>
+                                            <SelectTrigger className="w-full h-[36px] text-xs font-semibold border-gray-200 rounded-xl">
+                                                <SelectValue placeholder="Pilih Tindakan" />
+                                            </SelectTrigger>
+                                            <SelectContent className="rounded-xl">
+                                                {perawatanList.map(t => (
+                                                    <SelectItem key={t.id} value={t.id.toString()} className="text-xs font-medium">{t.nama_perawatan}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-wider">Dokter Penanggung Jawab</label>
-                                        <select value={formDokter} onChange={(e)=>setFormDokter(e.target.value)} className="w-full p-3 rounded-xl border border-gray-200 bg-white font-semibold text-gray-700">
-                                            <option value="drg. Farel Abdul Halim">drg. Farel Abdul Halim</option>
-                                            <option value="drg. Sarah Amalia">drg. Sarah Amalia</option>
-                                        </select>
+                                        <label className="text-[10px] uppercase font-bold text-gray-400 block mb-1">Tanggal Periksa</label>
+                                        <input required type="date" value={formTanggal} onChange={(e) => setFormTanggal(e.target.value)} className="w-full h-[36px] px-3 py-1.5 text-xs font-semibold rounded-xl border border-gray-200 outline-none"/>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-wider">Keluhan Pasien *</label>
+                                    <label className="text-[10px] uppercase font-bold text-gray-400 block mb-1">Catatan Dokter</label>
                                     <textarea 
-                                        required rows={2} placeholder="Tuliskan keluhan utama gigi pasien..." value={formKeluhan} onChange={(e)=>setFormKeluhan(e.target.value)}
-                                        className="w-full p-3 rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-blue-500/20 font-medium"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-wider">Diagnosa Klinis *</label>
-                                    <input 
-                                        type="text" required placeholder="Contoh: Pulpitis Akut / Karies Gigi" value={formDiagnosa} onChange={(e)=>setFormDiagnosa(e.target.value)}
-                                        className="w-full p-3 rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-blue-600"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-wider">Tindakan Medis</label>
-                                    <input 
-                                        type="text" placeholder="Contoh: Tambal Composite / Scaling Gigi" value={formTindakan} onChange={(e)=>setFormTindakan(e.target.value)}
-                                        className="w-full p-3 rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-blue-500/20 font-medium"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-wider">Catatan Tambahan Dokter</label>
-                                    <input 
-                                        type="text" placeholder="Contoh: Hindari dingin, kontrol kembali 6 bulan" value={formCatatan} onChange={(e)=>setFormCatatan(e.target.value)}
-                                        className="w-full p-3 rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-blue-500/20 font-medium text-gray-600"
+                                        required 
+                                        rows={3} 
+                                        value={formCatatanDokter} 
+                                        onChange={(e) => setFormCatatanDokter(e.target.value)} 
+                                        placeholder="Tuliskan keluhan klinis & diagnosa medis gigi di sini..." 
+                                        className="w-full p-3 text-xs font-semibold rounded-xl border border-gray-200 outline-none resize-none focus:border-blue-500"
                                     />
                                 </div>
                             </div>
 
-                            <DialogFooter className="pt-2 gap-2 sm:gap-0">
+                            <DialogFooter className="pt-4 flex gap-2 justify-end">
                                 <DialogClose asChild>
-                                    <button type="button" className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold cursor-pointer">Batal</button>
+                                    <button type="button" className="px-4 py-2 border border-gray-200 text-gray-500 font-bold text-xs rounded-xl cursor-pointer hover:bg-slate-50">Batal</button>
                                 </DialogClose>
-                                <button type="submit" className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-100 cursor-pointer transition">
-                                    {dialogMode === "tambah" ? "Simpan Berkas" : "Simpan Perubahan"}
-                                </button>
+                                <button type="submit" className="px-5 py-2 bg-blue-700 text-white font-bold text-xs rounded-xl cursor-pointer shadow-sm hover:bg-blue-800">Simpan Rekam</button>
                             </DialogFooter>
                         </form>
                     )}
 
-                    {/* DETAIL REKAM MEDIS COMPREHENSIVE */}
+                    {/* DETAIL COMPONENT (selectedRecord) */}
                     {dialogMode === "detail" && selectedRecord && (
-                        <>
+                        <div className="space-y-4">
                             <DialogHeader>
-                                <DialogTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                                    <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
-                                        <MdAssignment size={18}/>
-                                    </div> 
-                                    Lembar Dokumen Rekam Medis
+                                <DialogTitle className="text-base font-extrabold text-gray-900 flex items-center gap-2">
+                                    🔍 Lembar Rekam Medis #{selectedRecord.id}
                                 </DialogTitle>
-                                <DialogDescription className="text-xs text-gray-400 font-medium">
-                                    Dokumen klinis resmi rekam kesehatan gigi pasien.
-                                </DialogDescription>
                             </DialogHeader>
-
-                            <div className="my-4 space-y-3 text-xs">
-                                <div className="p-3 bg-slate-50 border border-gray-100 rounded-2xl flex justify-between items-center">
-                                    <div>
-                                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Nomor Berkas RM</p>
-                                        <p className="text-sm font-extrabold text-gray-800 mt-0.5">{selectedRecord.no_rm}</p>
-                                    </div>
-                                    <span className="font-mono text-xs font-bold text-gray-500 bg-white border border-gray-200 px-2.5 py-1 rounded-lg">
-                                        Patient ID: {selectedRecord.patient_id}
-                                    </span>
+                            <div className="bg-slate-50 rounded-2xl p-4 space-y-3 text-xs font-semibold border border-gray-100">
+                                <div className="flex justify-between border-b pb-2 border-gray-200/60">
+                                    <span className="text-gray-400 flex items-center gap-1"><MdPerson /> Nama Pasien</span>
+                                    <span className="text-gray-900 font-bold">{selectedRecord.pasien?.nama || "-"}</span>
                                 </div>
-
-                                <div className="p-3 bg-slate-50/50 border border-gray-100 rounded-xl space-y-1">
-                                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1"><MdCalendarMonth/> Waktu Pemeriksaan</span>
-                                    <p className="text-xs font-bold text-gray-700">{selectedRecord.tanggal}</p>
+                                <div className="flex justify-between border-b pb-2 border-gray-200/60">
+                                    <span className="text-gray-400 flex items-center gap-1"><FaUserMd /> Dokter Gigi</span>
+                                    <span className="text-blue-600 font-bold">{selectedRecord.dokter?.nama_dokter || selectedRecord.dokter?.nama || "-"}</span>
                                 </div>
-
-                                <div className="p-3 bg-amber-50/30 border border-amber-100/50 rounded-xl space-y-1">
-                                    <span className="text-[9px] font-bold text-amber-600 uppercase tracking-wider flex items-center gap-1"><MdSick/> Keluhan Utama</span>
-                                    <p className="text-xs font-semibold text-gray-700 leading-relaxed">{selectedRecord.keluhan}</p>
+                                <div className="flex justify-between border-b pb-2 border-gray-200/60">
+                                    <span className="text-gray-400 flex items-center gap-1"><MdMedicalServices /> Tindakan</span>
+                                    <span className="text-indigo-700 font-bold">{selectedRecord.perawatan?.nama_perawatan || "-"}</span>
                                 </div>
-
-                                <div className="p-3 bg-blue-50/30 border border-blue-100/50 rounded-xl space-y-1">
-                                    <span className="text-[9px] font-bold text-blue-500 uppercase tracking-wider flex items-center gap-1"><MdHealing/> Diagnosa Akhir</span>
-                                    <p className="text-sm font-extrabold text-blue-900">{selectedRecord.diagnosa}</p>
+                                <div className="flex justify-between border-b pb-2 border-gray-200/60">
+                                    <span className="text-gray-400 flex items-center gap-1"><MdCalendarToday /> Tanggal</span>
+                                    <span className="text-slate-800 font-mono">{selectedRecord.tanggal_periksa ? new Date(selectedRecord.tanggal_periksa).toLocaleDateString("id-ID") : "-"}</span>
                                 </div>
-
-                                <div className="p-3 bg-slate-50/50 border border-gray-100 rounded-xl space-y-1">
-                                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Tindakan Medis Realisasi</span>
-                                    <p className="text-xs font-bold text-gray-800">{selectedRecord.tindakan}</p>
-                                </div>
-
-                                <div className="p-3 bg-gray-50 border border-gray-100 rounded-xl space-y-1 italic text-gray-600">
-                                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider not-italic flex items-center gap-1"><MdRateReview/> Advise & Catatan Dokter</span>
-                                    <p className="text-xs font-medium">"{selectedRecord.catatan_dokter}"</p>
-                                </div>
-
-                                <div className="p-3 bg-blue-600 rounded-2xl text-white flex items-center gap-2 shadow-md shadow-blue-100">
-                                    <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center text-white"><MdPerson size={16}/></div>
-                                    <div>
-                                        <p className="text-[9px] opacity-70 uppercase font-bold tracking-wider">Dokter Pemeriksa</p>
-                                        <p className="text-xs font-bold">{selectedRecord.dokter}</p>
-                                    </div>
+                                <div className="flex flex-col gap-1 pt-1">
+                                    <span className="text-gray-400 flex items-center gap-1"><MdRateReview /> Catatan Penanganan Dokter</span>
+                                    <p className="bg-white p-3 border border-slate-100 rounded-xl mt-1 text-slate-700 font-medium leading-relaxed">
+                                        {selectedRecord.catatan_dokter || "Tidak ada catatan dokter."}
+                                    </p>
                                 </div>
                             </div>
-
                             <DialogFooter>
                                 <DialogClose asChild>
-                                    <button className="w-full px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold cursor-pointer">
-                                        Selesai Meninjau
-                                    </button>
+                                    <button className="w-full py-2 bg-slate-900 text-white font-bold text-xs rounded-xl cursor-pointer hover:bg-slate-800">Tutup Detail</button>
                                 </DialogClose>
                             </DialogFooter>
-                        </>
+                        </div>
                     )}
 
-                    {/* KONFIRMASI HAPUS (DELETE) */}
+                    {/* DELETE COMPONENT (selectedRecord) */}
                     {dialogMode === "hapus" && selectedRecord && (
-                        <>
+                        <div className="space-y-4">
                             <DialogHeader>
-                                <DialogTitle className="text-lg font-bold text-gray-800">Hapus Berkas Rekam Medis</DialogTitle>
-                                <DialogDescription className="text-xs text-gray-400 font-medium">
-                                    Tindakan ini permanen. Menghapus lembar rekam medis akan menghilangkan riwayat klinis tindakan pasien dari log database SIGIGI.
-                                </DialogDescription>
+                                <DialogTitle className="text-base font-extrabold text-rose-600">⚠️ Hapus Log Rekam Medis?</DialogTitle>
                             </DialogHeader>
-
-                            <div className="my-4 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex justify-between items-center">
-                                <div>
-                                    <p className="font-extrabold text-gray-800 text-base">{selectedRecord.no_rm}</p>
-                                    <p className="text-xs text-rose-700 font-bold mt-0.5">Diagnosa: {selectedRecord.diagnosa}</p>
-                                </div>
-                                <span className="text-xs text-gray-400 font-bold">{selectedRecord.tanggal}</span>
+                            <div className="p-3 bg-rose-50 rounded-xl border border-rose-100 text-xs">
+                                <p className="font-extrabold text-gray-800 text-sm">{selectedRecord.pasien?.nama}</p>
+                                <p className="text-[10px] text-rose-600 font-bold mt-0.5">Tindakan: {selectedRecord.perawatan?.nama_perawatan}</p>
                             </div>
-
-                            <DialogFooter className="gap-2 sm:gap-0">
+                            <p className="text-xs text-gray-500 font-medium">
+                                Tindakan ini bersifat permanen dan akan langsung menghapus log dari server database klinismu.
+                            </p>
+                            <DialogFooter className="pt-2 flex gap-2 justify-end">
                                 <DialogClose asChild>
-                                    <button className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold cursor-pointer">
-                                        Batalkan
-                                    </button>
+                                    <button className="px-4 py-2 border border-gray-200 text-gray-500 font-bold text-xs rounded-xl cursor-pointer hover:bg-slate-50">Batal</button>
                                 </DialogClose>
-                                <button 
-                                    onClick={() => handleDelete(selectedRecord.id)}
-                                    className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold cursor-pointer transition shadow-sm"
-                                >
-                                    Ya, Hapus Berkas
-                                </button>
+                                <button onClick={() => handleDelete(selectedRecord.id)} className="px-5 py-2 bg-rose-600 text-white font-bold text-xs rounded-xl cursor-pointer hover:bg-rose-700 shadow-sm">Ya, Hapus Log</button>
                             </DialogFooter>
-                        </>
+                        </div>
                     )}
-
                 </DialogContent>
             </Dialog>
-
         </div>
     );
 }

@@ -1,337 +1,434 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@supabase/supabase-js";
+import { pasienAPI } from "../services/pasienAPI"; // Menggunakan pasienAPI sesuai nama file lu
+
+const supabaseRealtime = createClient(
+    "https://hbhzdvmegcebkwalhfmh.supabase.co",
+    "sb_publishable_pOmGQPpegTn7tQMGmE1M1Q_wGvEPcJQ"
+);
+
+// Import ikon dari react-icons/md
 import {
-    MdSearch, MdVisibility, MdDelete, MdEdit,
-    MdWorkspacePremium, MdAdd, MdAssignmentInd
+    MdPersonAdd,
+    MdEdit,
+    MdDelete,
+    MdRemoveRedEye,
+    MdNavigateNext,
+    MdNavigateBefore,
+    MdSearch,
+    MdLocalPhone,
+    MdBadge,
+    MdLocationOn,
+    MdWc,
+    MdStar,
+    MdCalendarMonth
 } from "react-icons/md";
 
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-    DialogClose,
-} from "@/components/ui/dialog";
-
-// ── 1. DATA DUMMY AWAL (BISA DITAMBAH / DIEDIT / DIHAPUS DI LAYAR) ──
-const INITIAL_PATIENTS = [
-    { id: 1, no_rm: "RM-2026-001", nama: "Siti Aisyah", email: "siti.alsyah@gmail.com", no_telepon: "081234567890", membership: "Gold", poin: 850, status: "Aktif", alamat: "Jl. Sudirman No. 12", jenis_kelamin: "Perempuan", alergi: "Tidak Ada", riwayat_penyakit: "Tidak Ada" },
-    { id: 2, no_rm: "RM-2026-002", nama: "Budi Santoso", email: "budi.santoso@gmail.com", no_telepon: "082345678901", membership: "Silver", poin: 520, status: "Aktif", alamat: "Jl. Tuanku Tambusai", jenis_kelamin: "Laki-laki", alergi: "Penicillin", riwayat_penyakit: "Diabetes" },
-    { id: 3, no_rm: "RM-2026-003", nama: "Andi Saputra", email: "andi.saputra@gmail.com", no_telepon: "081278991122", membership: "Platinum", poin: 2350, status: "Aktif", alamat: "Jl. Soebrantas No. 89", jenis_kelamin: "Laki-laki", alergi: "Tidak Ada", riwayat_penyakit: "Tidak Ada" },
-    { id: 4, no_rm: "RM-2026-004", nama: "Rina Marlina", email: "rina.marlina@gmail.com", no_telepon: "081355667788", membership: "Gold", poin: 1200, status: "Aktif", alamat: "Jl. Riau No. 45", jenis_kelamin: "Perempuan", alergi: "Seafood", riwayat_penyakit: "Maag" },
-    { id: 5, no_rm: "RM-2026-005", nama: "Muhammad Rizky", email: "rizky@gmail.com", no_telepon: "081266889900", membership: "Standard", poin: 250, status: "Aktif", alamat: "Jl. Harapan Raya", jenis_kelamin: "Laki-laki", alergi: "Tidak Ada", riwayat_penyakit: "Tidak Ada" },
-    { id: 6, no_rm: "RM-2026-006", nama: "Nurul Hidayah", email: "nurul@gmail.com", no_telepon: "081377889900", membership: "Platinum", poin: 1850, status: "Aktif", alamat: "Jl. Paus No. 11", jenis_kelamin: "Perempuan", alergi: "Dingin", riwayat_penyakit: "Asma" }
-];
-
-// ── 2. KOMPONEN AVATAR OTOMATIS BERWARNA ──
-function PatientAvatar({ nama }) {
-    const initial = nama ? nama.charAt(0).toUpperCase() : "?";
-    const colors = [
-        "bg-blue-500 text-white", "bg-teal-500 text-white", 
-        "bg-purple-500 text-white", "bg-indigo-500 text-white", 
-        "bg-emerald-500 text-white", "bg-amber-500 text-white"
-    ];
-    const charCode = initial.charCodeAt(0) || 0;
-    const colorClass = colors[charCode % colors.length];
-
-    return (
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm tracking-wider shadow-sm border border-gray-100 ${colorClass}`}>
-            {initial}
-        </div>
-    );
-}
-
-// Badge Tingkat Loyalty
-const getMembershipBadge = (membershipType) => {
-    switch (membershipType) {
-        case "Platinum": return <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-blue-600 text-white shadow-sm flex items-center gap-1 max-w-fit"><MdWorkspacePremium/> PLATINUM</span>;
-        case "Gold":     return <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-amber-500 text-white shadow-sm flex items-center gap-1 max-w-fit"><MdWorkspacePremium/> GOLD</span>;
-        case "Silver":   return <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-slate-400 text-white shadow-sm flex items-center gap-1 max-w-fit"><MdWorkspacePremium/> SILVER</span>;
-        default:         return <span className="px-3 py-1 rounded-full text-[10px] font-semibold tracking-wider bg-gray-100 text-gray-500 border border-gray-200 max-w-fit">STANDARD</span>;
-    }
-};
+const ITEMS_PER_PAGE = 5;
+const MAX_PAGE_BUTTONS = 10;
 
 export default function Pasien() {
-    // State Utama Pengelola Data Pasien
-    const [patientsList, setPatientsList] = useState(INITIAL_PATIENTS);
-    const [search, setSearch]             = useState("");
-    
-    // State Modal & Aksi Kontrol
-    const [selectedPasien, setSelectedPasien] = useState(null);
-    const [dialogOpen, setDialogOpen]         = useState(false);
-    const [dialogMode, setDialogMode]         = useState("detail"); // detail / tambah / edit / hapus
-
-    // State Pagination Internal
+    const [patients, setPatients] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDetailOpen, setIsDetailOpen] = useState(false);
+    const [currentData, setCurrentData] = useState(null);
+    const [selectedPatient, setSelectedPatient] = useState(null);
+    const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5;
 
-    // State Controlled Form (Untuk Tambah & Edit)
-    const [formNama, setFormNama]           = useState("");
-    const [formEmail, setFormEmail]         = useState("");
-    const [formPhone, setFormPhone]         = useState("");
-    const [formMembership, setFormMembership] = useState("Standard");
-    const [formStatus, setFormStatus]       = useState("Aktif");
-
-    // Buka Modal Tambah Pasien
-    const openAddModal = () => {
-        setFormNama("");
-        setFormEmail("");
-        setFormPhone("");
-        setFormMembership("Standard");
-        setFormStatus("Aktif");
-        setDialogMode("tambah");
-        setDialogOpen(true);
-    };
-
-    // Buka Modal Edit Pasien
-    const openEditModal = (pasien) => {
-        setSelectedPasien(pasien);
-        setFormNama(pasien.nama);
-        setFormEmail(pasien.email);
-        setFormPhone(pasien.no_telepon);
-        setFormMembership(pasien.membership);
-        setFormStatus(pasien.status);
-        setDialogMode("edit");
-        setDialogOpen(true);
-    };
-
-    // ── FUNGSI CRUD LOGIC (STATE MURNI) ──
-    
-    // 1. CREATE (Tambah Pasien)
-    const handleAddPatient = (e) => {
-        e.preventDefault();
-        const nextId = patientsList.length + 1;
-        const newPatient = {
-            id: nextId,
-            no_rm: `RM-2026-0${nextId}`,
-            nama: formNama,
-            email: formEmail || `${formNama.toLowerCase().replace(/\s+/g, "")}@gmail.com`,
-            no_telepon: formPhone,
-            membership: formMembership,
-            poin: formMembership === "Platinum" ? 1500 : formMembership === "Gold" ? 500 : 0,
-            status: formStatus,
-            alamat: "Alamat Baru Pasien",
-            jenis_kelamin: "Laki-laki",
-            alergi: "Tidak Ada",
-            riwayat_penyakit: "Tidak Ada"
-        };
-        setPatientsList([newPatient, ...patientsList]);
-        setDialogOpen(false);
-    };
-
-    // 2. UPDATE (Simpan Perubahan Edit)
-    const handleEditPatient = (e) => {
-        e.preventDefault();
-        setPatientsList(patientsList.map(p => 
-            p.id === selectedPasien.id 
-                ? { ...p, nama: formNama, email: formEmail, no_telepon: formPhone, membership: formMembership, status: formStatus }
-                : p
-        ));
-        setDialogOpen(false);
-    };
-
-    // 3. DELETE (Hapus Data Pasien)
-    const executeDelete = (id) => {
-        setPatientsList(patientsList.filter(p => p.id !== id));
-        setDialogOpen(false);
-    };
-
-    // Filter Pencarian
-    const filteredPatients = patientsList.filter((item) => {
-        return item.nama.toLowerCase().includes(search.toLowerCase()) || item.no_rm.toLowerCase().includes(search.toLowerCase());
+    // State fiks hanya menggunakan kolom yang ada di database Supabase lu
+    const [formData, setFormData] = useState({
+        kode_pasien: "",
+        nama: "",
+        jenis_kelamin: "Laki-laki",
+        tanggal_lahir: "",
+        no_telp: "",
+        alamat: "",
+        membership: "Regular"
     });
 
-    // Pagination Slice Data
-    const totalPages = Math.ceil(filteredPatients.length / itemsPerPage);
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentPatients = filteredPatients.slice(indexOfFirstItem, indexOfLastItem);
+    const loadPatients = async () => {
+        setLoading(true);
+        try {
+            // Memanggil pasienAPI
+            const data = pasienAPI.fetchPasien 
+                ? await pasienAPI.fetchPasien() 
+                : await pasienAPI.fetchPatients();
+            setPatients(data || []);
+        } catch (error) {
+            console.error("Gagal menarik data pasien:", error.message);
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        loadPatients();
+    }, []);
+
+    useEffect(() => {
+        const channel = supabaseRealtime
+            .channel("realtime-pasien")
+            .on(
+                "postgres_changes",
+                { event: "*", schema: "public", table: "pasien" },
+                () => {
+                    loadPatients();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabaseRealtime.removeChannel(channel);
+        };
+    }, []);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const openCreateModal = () => {
+        setCurrentData(null);
+        const randomNum = Math.floor(100 + Math.random() * 900);
+        setFormData({
+            kode_pasien: `PSN-${randomNum}`,
+            nama: "",
+            jenis_kelamin: "Laki-laki",
+            tanggal_lahir: "",
+            no_telp: "",
+            alamat: "",
+            membership: "Regular"
+        });
+        setIsModalOpen(true);
+    };
+
+    const openEditModal = (item) => {
+        setCurrentData(item);
+        setFormData({
+            kode_pasien: item.kode_pasien || "",
+            nama: item.nama || "",
+            jenis_kelamin: item.jenis_kelamin || "Laki-laki",
+            tanggal_lahir: item.tanggal_lahir || "",
+            no_telp: item.no_telp || "",
+            alamat: item.alamat || "",
+            membership: item.membership || "Regular"
+        });
+        setIsModalOpen(true);
+    };
+
+    const openDetailModal = (item) => {
+        setSelectedPatient(item);
+        setIsDetailOpen(true);
+    };
+
+    const closeDetailModal = () => {
+        setSelectedPatient(null);
+        setIsDetailOpen(false);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const payload = {
+                kode_pasien: formData.kode_pasien,
+                nama: formData.nama,
+                jenis_kelamin: formData.jenis_kelamin,
+                tanggal_lahir: formData.tanggal_lahir,
+                no_telp: formData.no_telp,
+                alamat: formData.alamat,
+                membership: formData.membership
+            };
+
+            if (currentData) {
+                await pasienAPI.updatePasien(currentData.id, payload);
+            } else {
+                await pasienAPI.createPasien(payload);
+            }
+            setIsModalOpen(false);
+            loadPatients();
+        } catch (error) {
+            alert("Operasi database pasien gagal: " + (error.response?.data?.message || error.message));
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (window.confirm("Apakah Anda yakin ingin menghapus data pasien ini secara permanen?")) {
+            try {
+                await pasienAPI.deletePasien(id);
+                loadPatients();
+            } catch (error) {
+                alert("Gagal menghapus data pasien: " + error.message);
+            }
+        }
+    };
+
+    // Filter data berdasarkan search query
+    const filteredPatients = patients.filter((p) =>
+        p.nama?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.kode_pasien?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    // Perhitungan pagination frontend
+    const totalCount = filteredPatients.length;
+    const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+    const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
+    const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
+    const currentItems = filteredPatients.slice(indexOfFirstItem, indexOfLastItem);
+
+    const getMembershipColor = (level) => {
+        switch (level) {
+            case "Platinum": return "bg-purple-100 text-purple-700 border-purple-200";
+            case "Gold": return "bg-amber-100 text-amber-700 border-amber-200";
+            case "Silver": return "bg-slate-100 text-slate-700 border-slate-200";
+            default: return "bg-gray-100 text-gray-700 border-gray-200";
+        }
+    };
 
     return (
-        <div className="p-6 space-y-6 bg-gray-50/40 min-h-screen">
-            
-            {/* HEADER */}
-            <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-3xl p-6 text-white shadow-md flex justify-between items-center">
+        <div className="p-6 space-y-6 bg-gray-50 min-h-screen font-sans">
+            {/* HERO HEADER */}
+            <div className="bg-gradient-to-r from-blue-700 to-blue-500 rounded-3xl p-8 text-white shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-extrabold tracking-tight">Manajemen Pasien</h1>
-                    <p className="text-sm opacity-90 mt-1">Sistem Prototype CRUD Internal Tanpa Database</p>
+                    <h1 className="text-3xl font-bold">Data Master Pasien</h1>
+                    <p className="text-blue-100 mt-2">Kelola informasi data klinis rekam medis pasien terintegrasi database.</p>
                 </div>
-            </div>
-
-            {/* BAR CARI & TOMBOL TAMBAH */}
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col md:flex-row gap-3 items-center justify-between">
-                <div className="relative w-full md:flex-1">
-                    <MdSearch className="absolute left-3 top-3 text-gray-400 text-xl" />
-                    <input
-                        type="text"
-                        placeholder="Cari pasien atau no. RM..."
-                        value={search}
-                        onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-                        className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-gray-200 outline-none focus:border-blue-500"
-                    />
-                </div>
-                <button 
-                    onClick={openAddModal}
-                    className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                    <MdAdd size={16} /> Tambah Pasien
+                <button onClick={openCreateModal} className="bg-white text-blue-700 font-bold px-5 py-3 rounded-2xl shadow-md hover:bg-blue-50 transition-all flex items-center gap-2 cursor-pointer text-sm">
+                    <MdPersonAdd className="text-xl" /> Tambah Pasien Baru
                 </button>
             </div>
 
-            {/* TABEL DATA PASIEN */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead className="bg-slate-50 border-b border-gray-100">
-                            <tr>
-                                <th className="p-4 font-bold text-xs text-gray-400 uppercase">IDENTITAS PASIEN</th>
-                                <th className="p-4 font-bold text-xs text-gray-400 uppercase">NO REKAM MEDIS</th>
-                                <th className="p-4 font-bold text-xs text-gray-400 uppercase">KONTAK TELEPON</th>
-                                <th className="p-4 font-bold text-xs text-gray-400 uppercase">TINGKAT LOYALTY</th>
-                                <th className="p-4 font-bold text-xs text-gray-400 uppercase">TOTAL POIN</th>
-                                <th className="p-4 font-bold text-xs text-gray-400 uppercase">STATUS KEAKTIFAN</th>
-                                <th className="p-4 font-bold text-xs text-gray-400 uppercase text-center">AKSI TINDAKAN</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {currentPatients.map((pasien) => (
-                                <tr key={pasien.id} className="border-b border-gray-50 hover:bg-slate-50/50 transition-colors">
-                                    <td className="p-4">
-                                        <div className="flex items-center gap-3">
-                                            <PatientAvatar nama={pasien.nama} />
-                                            <div>
-                                                <h3 className="font-bold text-gray-800 text-sm">{pasien.nama}</h3>
-                                                <p className="text-xs text-gray-400">{pasien.email}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="p-4 font-mono text-xs font-bold text-slate-600">{pasien.no_rm}</td>
-                                    <td className="p-4 text-gray-600 font-semibold text-xs">{pasien.no_telepon}</td>
-                                    <td className="p-4">{getMembershipBadge(pasien.membership)}</td>
-                                    <td className="p-4 font-bold text-emerald-600 text-xs">{pasien.poin} Pts</td>
-                                    <td className="p-4">
-                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${pasien.status === 'Aktif' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
-                                            ● {pasien.status.toUpperCase()}
-                                        </span>
-                                    </td>
-                                    <td className="p-4">
-                                        <div className="flex items-center justify-center gap-1">
-                                            <button onClick={() => { setSelectedPasien(pasien); setDialogMode("detail"); setDialogOpen(true); }} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg cursor-pointer" title="Detail"><MdVisibility size={16}/></button>
-                                            <button onClick={() => openEditModal(pasien)} className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-lg cursor-pointer" title="Edit"><MdEdit size={16}/></button>
-                                            <button onClick={() => { setSelectedPasien(pasien); setDialogMode("hapus"); setDialogOpen(true); }} className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer" title="Hapus"><MdDelete size={16}/></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            {/* LIVE KONTROL & PENCARIAN */}
+            <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                <div className="relative w-full md:w-96">
+                    <MdSearch className="absolute left-3 top-3.5 text-gray-400 text-xl" />
+                    <input 
+                        type="text" 
+                        placeholder="Cari nama pasien atau kode pasien..." 
+                        value={searchQuery}
+                        onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
                 </div>
-
-                {/* NAVIGATION PAGINATION */}
-                <div className="p-4 border-t border-gray-50 flex items-center justify-between bg-gray-50/30">
-                    <span className="text-xs text-gray-400 font-medium">Menampilkan {currentPatients.length} dari {filteredPatients.length} Pasien</span>
-                    <div className="flex items-center gap-1">
-                        <button disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)} className="px-2.5 py-1 text-xs font-bold rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 cursor-pointer">&lt;</button>
-                        {[...Array(totalPages)].map((_, i) => (
-                            <button key={i} onClick={() => setCurrentPage(i + 1)} className={`px-3 py-1 text-xs font-bold rounded-lg ${currentPage === i + 1 ? 'bg-amber-500 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>{i + 1}</button>
-                        ))}
-                        <button disabled={currentPage === totalPages || totalPages === 0} onClick={() => setCurrentPage(prev => prev + 1)} className="px-2.5 py-1 text-xs font-bold rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 cursor-pointer">&gt;</button>
-                    </div>
+                <div className="text-sm font-semibold text-gray-500">
+                    Total: <span className="text-blue-700 font-bold">{totalCount}</span> Pasien Terfilter
                 </div>
             </div>
 
-            {/* OVERLAY MODAL MANAGER */}
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogContent className="max-w-md bg-white p-6 rounded-2xl border-none shadow-xl">
-                    
-                    {/* FORM TAMBAH PASIEN */}
-                    {dialogMode === "tambah" && (
-                        <form onSubmit={handleAddPatient} className="space-y-4">
-                            <DialogHeader><DialogTitle className="text-base font-bold text-gray-800">Registrasi Pasien Baru</DialogTitle></DialogHeader>
-                            <div className="space-y-3 text-xs">
+            {/* MAIN DATA TABLE VIEW */}
+            {loading && patients.length === 0 ? (
+                <div className="text-center py-20 font-semibold text-gray-400 text-lg bg-white rounded-3xl shadow-sm border border-gray-100">Menghubungkan ke server pasien...</div>
+            ) : currentItems.length === 0 ? (
+                <div className="text-center py-20 font-semibold text-gray-400 text-lg bg-white rounded-3xl border border-gray-100 shadow-sm">Tidak ada data pasien ditemukan.</div>
+            ) : (
+                <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-gray-50 text-gray-500 text-xs font-bold uppercase tracking-wider border-b border-gray-100">
+                                    <th className="py-4 px-6">Profil Pasien</th>
+                                    <th className="py-4 px-6">No. Telepon</th>
+                                    <th className="py-4 px-6">Gender</th>
+                                    <th className="py-4 px-6">Tanggal Lahir</th>
+                                    <th className="py-4 px-6 text-center">Membership</th>
+                                    <th className="py-4 px-6 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
+                                {currentItems.map((item) => (
+                                    <tr key={item.id} className="hover:bg-slate-50/80 transition-colors group">
+                                        <td className="py-4 px-6">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-base shrink-0 shadow-inner">
+                                                    {item.nama ? item.nama.charAt(0).toUpperCase() : "?"}
+                                                </div>
+                                                <div>
+                                                    <span className="font-bold text-gray-800 block group-hover:text-blue-700 transition-colors">{item.nama}</span>
+                                                    <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md inline-flex items-center gap-1 mt-0.5"><MdBadge /> {item.kode_pasien}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="py-4 px-6">
+                                            <span className="text-gray-600 font-medium inline-flex items-center gap-1">
+                                                <MdLocalPhone className="text-gray-400" /> {item.no_telp || "-"}
+                                            </span>
+                                        </td>
+                                        <td className="py-4 px-6">
+                                            <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 text-xs px-2.5 py-1 rounded-full font-medium">
+                                                <MdWc className="text-gray-400" /> {item.jenis_kelamin || "Laki-laki"}
+                                            </span>
+                                        </td>
+                                        <td className="py-4 px-6 text-gray-600 font-medium">
+                                            {item.tanggal_lahir ? new Date(item.tanggal_lahir).toLocaleDateString("id-ID") : "-"}
+                                        </td>
+                                        <td className="py-4 px-6 text-center">
+                                            <span className={`text-xs font-bold px-3 py-1 rounded-full border ${getMembershipColor(item.membership)}`}>
+                                                {item.membership || "Regular"}
+                                            </span>
+                                        </td>
+                                        <td className="py-4 px-6">
+                                            <div className="flex items-center justify-center gap-3">
+                                                <button onClick={() => openDetailModal(item)} title="Detail Pasien" className="text-blue-500 hover:text-blue-700 cursor-pointer transition-colors p-1">
+                                                    <MdRemoveRedEye size={18} />
+                                                </button>
+                                                <button onClick={() => openEditModal(item)} title="Edit Pasien" className="text-blue-500 hover:text-blue-700 cursor-pointer transition-colors p-1">
+                                                    <MdEdit size={18} />
+                                                </button>
+                                                <button onClick={() => handleDelete(item.id)} title="Hapus Pasien" className="text-red-500 hover:text-red-700 cursor-pointer transition-colors p-1">
+                                                    <MdDelete size={18} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* PAGINATION */}
+                    {totalPages > 1 && (
+                        <div className="flex justify-center items-center gap-2 py-4 bg-gray-50 border-t border-gray-100">
+                            <button
+                                onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 text-gray-700 bg-white font-bold hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                            >
+                                <MdNavigateBefore size={20} />
+                            </button>
+                            {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pageNum) => (
+                                <button
+                                    key={pageNum}
+                                    onClick={() => setCurrentPage(pageNum)}
+                                    className={`w-10 h-10 flex items-center justify-center rounded-xl font-bold text-sm transition-all cursor-pointer ${
+                                        currentPage === pageNum
+                                            ? "bg-blue-700 text-white shadow-md"
+                                            : "border border-gray-200 text-gray-600 bg-white hover:bg-gray-50"
+                                    }`}
+                                >
+                                    {pageNum}
+                                </button>
+                            ))}
+                            <button
+                                onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
+                                disabled={currentPage === totalPages}
+                                className="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 text-gray-700 bg-white font-bold hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                            >
+                                <MdNavigateNext size={20} />
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* MODAL FORM */}
+            {isModalOpen && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto border border-gray-100">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                            {currentData ? "📝 Update Data Pasien" : "✨ Daftarkan Pasien Baru"}
+                        </h2>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block font-bold text-gray-500 mb-1">NAMA LENGKAP *</label>
-                                    <input type="text" required placeholder="Contoh: Ahmad Dhani" value={formNama} onChange={(e)=>setFormNama(e.target.value)} className="w-full p-2.5 rounded-lg border border-gray-200 outline-none focus:border-blue-500" />
+                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nama Lengkap Pasien *</label>
+                                    <input type="text" name="nama" required value={formData.nama} onChange={handleInputChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-blue-600 focus:outline-none" placeholder="Nama lengkap pasien..."/>
                                 </div>
                                 <div>
-                                    <label className="block font-bold text-gray-500 mb-1">NOMOR TELEPON *</label>
-                                    <input type="text" required placeholder="0812xxxx" value={formPhone} onChange={(e)=>setFormPhone(e.target.value)} className="w-full p-2.5 rounded-lg border border-gray-200 outline-none focus:border-blue-500" />
+                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">No. Telepon / WA *</label>
+                                    <input type="text" name="no_telp" required value={formData.no_telp} onChange={handleInputChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-blue-600 focus:outline-none" placeholder="08xxxxxxxxxx"/>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Kode Pasien</label>
+                                    <input type="text" name="kode_pasien" disabled value={formData.kode_pasien} className="w-full px-4 py-2.5 bg-gray-100 text-gray-500 font-bold text-sm rounded-xl cursor-not-allowed border border-gray-200"/>
                                 </div>
                                 <div>
-                                    <label className="block font-bold text-gray-500 mb-1">MEMBERSHIP LEVEL</label>
-                                    <select value={formMembership} onChange={(e)=>setFormMembership(e.target.value)} className="w-full p-2.5 rounded-lg border border-gray-200 bg-white outline-none">
-                                        <option value="Standard">Standard</option>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Tanggal Lahir *</label>
+                                    <input type="date" name="tanggal_lahir" required value={formData.tanggal_lahir} onChange={handleInputChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-blue-600 focus:outline-none"/>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Jenis Kelamin</label>
+                                    <select name="jenis_kelamin" value={formData.jenis_kelamin} onChange={handleInputChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-white focus:border-blue-600 focus:outline-none">
+                                        <option value="Laki-laki">Laki-laki</option>
+                                        <option value="Perempuan">Perempuan</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Membership</label>
+                                    <select name="membership" value={formData.membership} onChange={handleInputChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-white focus:border-blue-600 focus:outline-none">
+                                        <option value="Regular">Regular</option>
                                         <option value="Silver">Silver</option>
                                         <option value="Gold">Gold</option>
                                         <option value="Platinum">Platinum</option>
                                     </select>
                                 </div>
                             </div>
-                            <DialogFooter className="pt-2"><button type="submit" className="w-full py-2.5 bg-blue-600 text-white rounded-lg text-xs font-bold cursor-pointer hover:bg-blue-700">Simpan Pasien</button></DialogFooter>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Alamat Rumah Lengkap</label>
+                                <textarea name="alamat" rows="3" value={formData.alamat} onChange={handleInputChange} className="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm focus:border-blue-600 focus:outline-none" placeholder="Tulis alamat rumah domisili pasien..."></textarea>
+                            </div>
+                            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 rounded-xl text-gray-500 bg-gray-100 font-bold text-sm cursor-pointer hover:bg-gray-200">Batal</button>
+                                <button type="submit" className="px-5 py-2.5 rounded-xl text-white bg-blue-700 font-bold text-sm shadow-md cursor-pointer hover:bg-blue-800">Simpan Pasien</button>
+                            </div>
                         </form>
-                    )}
+                    </div>
+                </div>
+            )}
 
-                    {/* FORM EDIT PASIEN */}
-                    {dialogMode === "edit" && (
-                        <form onSubmit={handleEditPatient} className="space-y-4">
-                            <DialogHeader><DialogTitle className="text-base font-bold text-gray-800">Ubah Data Pasien</DialogTitle></DialogHeader>
-                            <div className="space-y-3 text-xs">
-                                <div>
-                                    <label className="block font-bold text-gray-500 mb-1">NAMA PASIEN</label>
-                                    <input type="text" required value={formNama} onChange={(e)=>setFormNama(e.target.value)} className="w-full p-2.5 rounded-lg border border-gray-200 outline-none" />
-                                </div>
-                                <div>
-                                    <label className="block font-bold text-gray-500 mb-1">KONTAK TELEPON</label>
-                                    <input type="text" required value={formPhone} onChange={(e)=>setFormPhone(e.target.value)} className="w-full p-2.5 rounded-lg border border-gray-200 outline-none" />
-                                </div>
-                                <div>
-                                    <label className="block font-bold text-gray-500 mb-1">STATUS KEAKTIFAN</label>
-                                    <select value={formStatus} onChange={(e)=>setFormStatus(e.target.value)} className="w-full p-2.5 rounded-lg border border-gray-200 bg-white">
-                                        <option value="Aktif">Aktif</option>
-                                        <option value="Tidak Aktif">Tidak Aktif</option>
-                                    </select>
-                                </div>
+            {/* MODAL DETAIL PASIEN */}
+            {isDetailOpen && selectedPatient && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 relative">
+                        <div className="flex items-center gap-4 border-b border-gray-100 pb-4 mb-4">
+                            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-700 to-blue-500 text-white flex items-center justify-center font-bold text-2xl shadow-md">
+                                {selectedPatient.nama ? selectedPatient.nama.charAt(0).toUpperCase() : "?"}
                             </div>
-                            <DialogFooter className="pt-2"><button type="submit" className="w-full py-2.5 bg-amber-500 text-white rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-600">Simpan Perubahan</button></DialogFooter>
-                        </form>
-                    )}
-
-                    {/* MODAL DETAIL */}
-                    {dialogMode === "detail" && selectedPasien && (
-                        <div className="space-y-4">
-                            <DialogHeader><DialogTitle className="text-sm font-bold flex items-center gap-1.5 text-gray-700"><MdAssignmentInd className="text-blue-600"/> Kartu Pasien</DialogTitle></DialogHeader>
-                            <div className="flex items-center gap-3 py-2 border-b border-gray-100">
-                                <PatientAvatar nama={selectedPasien.nama} />
-                                <div>
-                                    <h4 className="font-bold text-gray-800 text-sm">{selectedPasien.nama}</h4>
-                                    <p className="text-xs font-mono text-gray-400">{selectedPasien.no_rm}</p>
-                                </div>
-                            </div>
-                            <div className="space-y-2 text-xs text-gray-600">
-                                <p><strong>Telepon:</strong> {selectedPasien.no_telepon}</p>
-                                <p><strong>Email:</strong> {selectedPasien.email}</p>
-                                <p><strong>Alergi:</strong> {selectedPasien.alergi}</p>
-                                <p><strong>Riwayat Medis:</strong> {selectedPasien.riwayat_penyakit}</p>
-                            </div>
-                            <DialogFooter><DialogClose asChild><button className="w-full py-2 bg-slate-800 text-white text-xs font-bold rounded-lg cursor-pointer">Tutup</button></DialogClose></DialogFooter>
-                        </div>
-                    )}
-
-                    {/* CONFIRM HAPUS */}
-                    {dialogMode === "hapus" && selectedPasien && (
-                        <div className="space-y-4">
-                            <DialogHeader><DialogTitle className="text-base font-bold text-rose-600">Hapus Data?</DialogTitle></DialogHeader>
-                            <p className="text-xs text-gray-500">Menghapus data <strong>{selectedPasien.nama}</strong> bersifat permanen selama sesi browser ini aktif.</p>
-                            <div className="flex gap-2 justify-end pt-2">
-                                <DialogClose asChild><button className="px-3 py-2 bg-gray-100 text-gray-700 text-xs font-bold rounded-lg cursor-pointer">Batal</button></DialogClose>
-                                <button onClick={() => executeDelete(selectedPasien.id)} className="px-3 py-2 bg-rose-600 text-white text-xs font-bold rounded-lg cursor-pointer hover:bg-rose-700">Hapus</button>
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-800">{selectedPatient.nama}</h3>
+                                <p className="text-blue-600 text-xs font-bold bg-blue-50 px-2.5 py-1 rounded-md mt-1 inline-block">Kode Pasien: {selectedPatient.kode_pasien}</p>
                             </div>
                         </div>
-                    )}
 
-                </DialogContent>
-            </Dialog>
+                        <div className="space-y-3 text-sm text-gray-700">
+                            <div className="grid grid-cols-2 border-b border-dashed border-gray-100 pb-2">
+                                <span className="text-gray-400 font-medium">No. Telepon / WA</span>
+                                <span className="font-semibold text-right text-gray-800">{selectedPatient.no_telp || "-"}</span>
+                            </div>
+                            <div className="grid grid-cols-2 border-b border-dashed border-gray-100 pb-2">
+                                <span className="text-gray-400 font-medium">Jenis Kelamin</span>
+                                <span className="font-semibold text-right text-gray-800">{selectedPatient.jenis_kelamin}</span>
+                            </div>
+                            <div className="grid grid-cols-2 border-b border-dashed border-gray-100 pb-2">
+                                <span className="text-gray-400 font-medium">Tanggal Lahir</span>
+                                <span className="font-semibold text-right text-gray-800">
+                                    {selectedPatient.tanggal_lahir ? new Date(selectedPatient.tanggal_lahir).toLocaleDateString("id-ID") : "-"}
+                                </span>
+                            </div>
+                            <div className="grid grid-cols-2 border-b border-dashed border-gray-100 pb-2">
+                                <span className="text-gray-400 font-medium">Membership Level</span>
+                                <span className="font-bold text-right text-purple-600">{selectedPatient.membership || "Regular"}</span>
+                            </div>
+                            <div className="p-3 bg-slate-50 rounded-xl border border-gray-200 text-xs text-gray-600 flex items-start gap-2">
+                                <MdLocationOn className="mt-0.5 shrink-0 text-base text-gray-400" />
+                                <div>
+                                    <strong className="block text-gray-500 mb-0.5">Alamat Domisili Rumah:</strong>
+                                    {selectedPatient.alamat || "Tidak ada alamat lengkap tercatat."}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 pt-4 border-t border-gray-100 flex justify-end">
+                            <button onClick={closeDetailModal} className="px-6 py-2 rounded-xl text-white bg-blue-700 font-bold text-sm shadow-md hover:bg-blue-800 transition-colors cursor-pointer">
+                                Tutup Detail
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
-

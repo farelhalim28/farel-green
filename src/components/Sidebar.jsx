@@ -12,7 +12,8 @@ import {
     MdBarChart,
     MdSettings,
     MdGridView,
-    MdSupervisorAccount // Icon baru khusus untuk Manajemen User Admin
+    MdSupervisorAccount,
+    MdAssignmentInd // Ikon baru untuk Dokter
 } from "react-icons/md";
 import { FaTooth } from "react-icons/fa";
 
@@ -32,6 +33,11 @@ const menuItems = [
         icon: MdPeople,
         label: "Pasien",
         path: "/admin/pasien",
+    },
+    {
+        icon: MdAssignmentInd, // MENU DOKTER BARU YANG SUDAH TERINTEGRASI!
+        label: "Dokter",
+        path: "/admin/dokter",
     },
     {
         icon: MdMedicalServices,
@@ -62,11 +68,6 @@ const menuItems = [
         icon: MdSettings,
         label: "Pengaturan",
         path: "/admin/pengaturan",
-    },
-    {
-        icon: MdGridView,
-        label: "Components",
-        path: "/admin/components",
     },
 ];
 

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = "https://hbhzdvmegcebkwalhfmh.supabase.co/rest/v1/janji_temu";
+const API_URL = "https://hbhzdvmegcebkwalhfmh.supabase.co/rest/v1/laporan";
 const API_KEY = "sb_publishable_pOmGQPpegTn7tQMGmE1M1Q_wGvEPcJQ";
 
 const headers = {
@@ -10,47 +10,47 @@ const headers = {
   "Prefer": "return=representation"
 };
 
-export const janjiTemuAPI = {
-  fetchAppointments: async () => {
+export const laporanAPI = {
+  // Menarik data laporan beserta relasi pembayaran -> rekam_medis -> pasien & perawatan
+  fetchLaporan: async () => {
     try {
-      // Menggunakan join eksplisit lewat foreign key 'perawatan_rencana_id' menuju tabel 'perawatan'
       const response = await axios.get(
-        `${API_URL}?select=*,pasien(*),dokter(*),perawatan:perawatan_rencana_id(*)&order=tanggal_janji.asc`, 
+        `${API_URL}?select=*,pembayaran(invoice_no,tagihan_akhir,tanggal_bayar,rekam_medis(no_rekam_medis,pasien(nama,kode_pasien),perawatan(nama_perawatan)))&order=tanggal_laporan.desc`, 
         { headers }
       );
       return response.data;
     } catch (error) {
-      console.error("Error fetchAppointments:", error.response?.data || error.message);
+      console.error("Error fetchLaporan:", error.response?.data || error.message);
       throw error;
     }
   },
 
-  createJanjiTemu: async (data) => {
+  createLaporan: async (data) => {
     try {
       const response = await axios.post(API_URL, data, { headers });
       return response.data;
     } catch (error) {
-      console.error("Error createJanjiTemu:", error.response?.data || error.message);
+      console.error("Error createLaporan:", error.response?.data || error.message);
       throw error;
     }
   },
 
-  updateJanjiTemu: async (id, data) => {
+  updateLaporan: async (id, data) => {
     try {
       const response = await axios.patch(`${API_URL}?id=eq.${id}`, data, { headers });
       return response.data;
     } catch (error) {
-      console.error("Error updateJanjiTemu:", error.response?.data || error.message);
+      console.error("Error updateLaporan:", error.response?.data || error.message);
       throw error;
     }
   },
 
-  deleteJanjiTemu: async (id) => {
+  deleteLaporan: async (id) => {
     try {
       const response = await axios.delete(`${API_URL}?id=eq.${id}`, { headers });
       return response.data;
     } catch (error) {
-      console.error("Error deleteJanjiTemu:", error.response?.data || error.message);
+      console.error("Error deleteLaporan:", error.response?.data || error.message);
       throw error;
     }
   }
