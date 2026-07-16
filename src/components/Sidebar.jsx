@@ -11,11 +11,9 @@ import {
     MdPayment,
     MdBarChart,
     MdSettings,
-    MdGridView,
     MdSupervisorAccount,
-    MdAssignmentInd // Ikon baru untuk Dokter
+    MdAssignmentInd
 } from "react-icons/md";
-import { FaTooth } from "react-icons/fa";
 
 // SEMUA PATH SUDAH DISINKRONKAN MENGGUNAKAN AWALAN /admin SESUAI FILE App.jsx LU
 const menuItems = [
@@ -35,7 +33,7 @@ const menuItems = [
         path: "/admin/pasien",
     },
     {
-        icon: MdAssignmentInd, // MENU DOKTER BARU YANG SUDAH TERINTEGRASI!
+        icon: MdAssignmentInd,
         label: "Dokter",
         path: "/admin/dokter",
     },
@@ -60,7 +58,7 @@ const menuItems = [
         path: "/admin/laporan",
     },
     {
-        icon: MdSupervisorAccount, // MENU USER YANG HILANG SUDAH MUNCUL DI SINI, BRO!
+        icon: MdSupervisorAccount,
         label: "Manajemen User",
         path: "/admin/user",
     },
@@ -89,18 +87,21 @@ export default function Sidebar() {
     return (
         <aside className="w-[260px] h-screen bg-white border-r border-gray-100 flex flex-col sticky top-0 z-20">
 
-            {/* Logo */}
+            {/* Bagian Logo - FIX UKURAN BESAR DAN SEJAJAR TEKS */}
             <div className="p-5 border-b border-gray-100">
-                <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-200">
-                        <FaTooth className="text-white text-xl" />
-                    </div>
+                <div className="flex items-center gap-1">
+                    {/* Ukuran digedein ke w-16 h-16 & dikasih margin negatif dikit biar ngepas */}
+                    <img 
+                        src="/img/logoSIGIGI.png" 
+                        alt="Logo SIGIGI" 
+                        className="w-16 h-16 object-contain mt-[-4px] mb-[-4px]" 
+                    />
 
                     <div>
-                        <h1 className="font-bold text-gray-800 text-lg">
+                        <h1 className="font-bold text-gray-800 text-lg leading-none">
                             SIGIGI
                         </h1>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-gray-400 mt-1">
                             Klinik Sehat Senyum
                         </p>
                     </div>

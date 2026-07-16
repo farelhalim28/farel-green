@@ -62,7 +62,7 @@ export default function App() {
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/doctors" element={<DoctorsPage />} />
           <Route path="/membership" element={<MembershipPage />} />
-          <Route path="/membership/register" element={<RegistrasiMembership />} />
+          <Route path="/register-member" element={<RegistrasiMembership />} />
           <Route path="/promo" element={<PromoPage />} />
           <Route path="/faq" element={<FAQPage />} />
           <Route path="/contact" element={<ContactPage />} />

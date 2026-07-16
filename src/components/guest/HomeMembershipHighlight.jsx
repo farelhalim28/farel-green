@@ -16,43 +16,61 @@ export default function HomeMembershipHighlight() {
           Makin Sering Kontrol, Makin Banyak Untung
         </h2>
         <p className="text-gray-500 mt-4 max-w-xl mx-auto text-base">
-          Sistem CRM kami mengonversi biaya perawatan Anda menjadi poin reward yang bisa ditukarkan dengan potongan harga langsung.
+          Sistem CRM kami mengonversi biaya perawatan Anda menjadi poin reward yang bisa ditukarkan dengan potongan harga langsung sesuai level keanggotaan Anda.
         </p>
         
-        {/* Grid Card Versi Terang & Elegan */}
-        <div className="grid md:grid-cols-3 gap-6 mt-14 text-left">
+        {/* Grid Card - 4 Kolom (Reguler, Silver, Gold, Platinum) */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-14 text-left">
+          
+          {/* Reguler Tier */}
+          <div className="bg-slate-50 border border-slate-100 p-6 rounded-3xl hover:shadow-xl transition duration-300 flex flex-col justify-between">
+            <div>
+              <h4 className="font-bold text-slate-600 text-lg flex items-center gap-2">
+                🥉 Reguler Tier
+              </h4>
+              <p className="text-gray-500 text-sm mt-3 leading-relaxed">
+                Tingkat awal pasca registrasi. Kumpulkan poin dasar setiap kunjungan dan dapatkan pengingat jadwal periksa otomatis.
+              </p>
+            </div>
+          </div>
           
           {/* Silver Tier */}
-          <div className="bg-slate-50 border border-slate-100 p-8 rounded-3xl hover:shadow-xl transition duration-300">
-            <h4 className="font-bold text-blue-600 text-xl flex items-center gap-2">
-              🥈 Silver Tier
-            </h4>
-            <p className="text-gray-500 text-sm mt-3 leading-relaxed">
-              Dapatkan potongan 5% untuk setiap pembersihan karang gigi dan tindakan pencegahan dasar.
-            </p>
+          <div className="bg-slate-50 border border-slate-100 p-6 rounded-3xl hover:shadow-xl transition duration-300 flex flex-col justify-between">
+            <div>
+              <h4 className="font-bold text-blue-600 text-lg flex items-center gap-2">
+                🥈 Silver Tier
+              </h4>
+              <p className="text-gray-500 text-sm mt-3 leading-relaxed">
+                Dapatkan potongan 5% untuk setiap pembersihan karang gigi dan tindakan pencegahan dasar setelah mencapai 500 poin.
+              </p>
+            </div>
           </div>
           
           {/* Gold Tier */}
-          <div className="bg-white border-2 border-blue-500 p-8 rounded-3xl shadow-md md:-translate-y-2 relative transition duration-300">
-            <span className="absolute -top-3 left-6 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+          <div className="bg-white border-2 border-blue-500 p-6 rounded-3xl shadow-md relative transition duration-300 flex flex-col justify-between">
+            <span className="absolute -top-3 left-6 bg-blue-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">
               Paling Populer
             </span>
-            <h4 className="font-bold text-amber-500 text-xl flex items-center gap-2">
-              🥇 Gold Tier
-            </h4>
-            <p className="text-slate-600 text-sm mt-3 leading-relaxed">
-              Potongan 10% semua tindakan dan dapatkan prioritas booking tanpa antrean kasir.
-            </p>
+            <div>
+              <h4 className="font-bold text-amber-500 text-lg flex items-center gap-2 mt-1">
+                🥇 Gold Tier
+              </h4>
+              <p className="text-slate-600 text-sm mt-3 leading-relaxed">
+                Potongan 10% untuk semua tindakan, prioritas antrean, serta tambahan poin bonus setelah mengumpulkan 1.000 poin.
+              </p>
+            </div>
           </div>
           
-          {/* VIP Platinum */}
-          <div className="bg-slate-50 border border-slate-100 p-8 rounded-3xl hover:shadow-xl transition duration-300">
-            <h4 className="font-bold text-purple-600 text-xl flex items-center gap-2">
-              💎 VIP Platinum
-            </h4>
-            <p className="text-gray-500 text-sm mt-3 leading-relaxed">
-              Diskon 15% semua tindakan medis + gratis konsultasi berkala langsung dengan dokter spesialis.
-            </p>
+          {/* Platinum Tier */}
+          <div className="bg-slate-50 border border-slate-100 p-6 rounded-3xl hover:shadow-xl transition duration-300 flex flex-col justify-between">
+            <div>
+              <h4 className="font-bold text-purple-600 text-lg flex items-center gap-2">
+                💎 Platinum Tier
+              </h4>
+              <p className="text-gray-500 text-sm mt-3 leading-relaxed">
+                Diskon mutlak 15% semua tindakan medis + gratis konsultasi berkala dengan dokter spesialis saat poin mencapai 2.000.
+              </p>
+            </div>
           </div>
           
         </div>
